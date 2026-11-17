@@ -55,11 +55,16 @@ main{max-width:1240px;margin:0 auto;padding:6px 16px 28px;display:grid;grid-temp
 /* recipe view */
 .overlay{position:fixed;inset:0;background:rgba(74,34,48,.55);display:none;align-items:flex-start;justify-content:center;z-index:50;overflow:auto;padding:16px 12px 40px;-webkit-overflow-scrolling:touch}
 .overlay.on{display:flex}
-.sheet{background:var(--ivory);border-radius:22px;max-width:760px;width:100%;padding:16px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.sheet{background:var(--ivory);border-radius:22px;max-width:600px;width:100%;padding:16px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
 .sheet img{display:block;width:100%;height:auto;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
 .actions{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
 .actions button{min-height:52px;border-radius:999px;border:2px solid var(--cran);background:#fff;color:var(--cran);font-size:17px}
 .actions button.primary{background:var(--cran);color:#fff}
+.actions button.full{grid-column:1/-1}
+.lbl{display:block;font-size:14px;color:#6b4a54;margin:2px 2px 5px}
+.lbl span{color:#9a7c84;font-style:italic}
+.childin{width:100%;font-family:inherit;font-size:18px;color:var(--cran);border:2px solid var(--mint);border-radius:14px;padding:10px 12px;background:#fff;margin-bottom:10px}
+.childin:focus{outline:3px solid var(--mintsoft)}
 .note{font-size:13px;color:#7a5a62;text-align:center;margin:10px 4px 0}
 .modal{position:fixed;inset:0;background:rgba(74,34,48,.5);display:none;align-items:center;justify-content:center;z-index:80;padding:20px}
 .modal.on{display:flex}
@@ -81,10 +86,10 @@ main{max-width:1240px;margin:0 auto;padding:6px 16px 28px;display:grid;grid-temp
   .tops button{font-size:14px}
 }
 @media print{
-  @page{margin:0.4in}
-  html,body{background:#fff !important}
+  @page{margin:0.5in}
+  html,body{background:#fff !important;min-height:0 !important;height:auto !important}
   body > *{display:none !important}
-  #printImg{display:block !important;width:100%;height:auto;max-height:10in;object-fit:contain;margin:0 auto}
+  #printImg{display:block !important;width:5in;height:7in;margin:0.25in auto 0;break-inside:avoid;page-break-after:avoid}
 }
 </style>
 </head>
@@ -111,13 +116,16 @@ main{max-width:1240px;margin:0 auto;padding:6px 16px 28px;display:grid;grid-temp
     </div>
     <div class="section">
       <h2><span class="n">3</span>Name your cocoa</h2>
+      <label class="lbl" for="child">Your first name <span>(optional)</span></label>
+      <input id="child" class="childin" maxlength="20" autocomplete="off" placeholder="e.g. Ellie">
+      <label class="lbl" for="name">Your cocoa’s fun name</label>
       <div class="namebox">
         <input id="name" maxlength="40" autocomplete="off" aria-label="Name for your hot cocoa">
         <button class="dice" id="dice" aria-label="Make up a new name" title="New name">&#127922;</button>
       </div>
       <p class="hint">Tap the dice for a new name, or type your own.</p>
     </div>
-    <button class="make" id="make">Make My Recipe &#9749;</button>
+    <button class="make" id="make">Create My Magical Recipe! &#10024;</button>
     <p class="selected" id="summary"></p>
   </div>
 </main>
@@ -126,12 +134,11 @@ main{max-width:1240px;margin:0 auto;padding:6px 16px 28px;display:grid;grid-temp
   <div class="sheet">
     <img id="cardImg" alt="Your printable hot cocoa recipe card">
     <div class="actions">
-      <button class="primary" id="printBtn">&#128424; Print</button>
-      <button class="primary" id="pdfBtn">&#11015; Save as PDF</button>
-      <button id="pngBtn">Save picture</button>
-      <button id="closeRecipe">&#8592; Keep making cocoa</button>
+      <button class="primary" id="printBtn">&#128424; Print My Recipe</button>
+      <button class="primary" id="pdfBtn">&#11015; Save My Recipe</button>
+      <button class="full" id="closeRecipe">&#8592; Change my cocoa</button>
     </div>
-    <p class="note">Tip: in the print window you can also choose &ldquo;Save as PDF&rdquo;.</p>
+    <p class="note">Grown-ups: <b>Print My Recipe</b> prints just the card at its real 5 &times; 7 inch size. <b>Save My Recipe</b> saves a 5 &times; 7 inch PDF you can print later.</p>
   </div>
 </div>
 
@@ -201,12 +208,12 @@ const MUGS = [
 ];
 // Topping amounts are defined here and used on the card. Order = layering order.
 const TOPS = [
-  {id:"cream",  name:"Whipped cream",      amount:"2 tbsp (30 mL) whipped cream",                        word:"Cloud"},
-  {id:"marsh",  name:"Mini marshmallows",  amount:"2 tbsp (30 mL) mini marshmallows",                    word:"Marshmallow"},
-  {id:"choc",   name:"Chocolate shavings", amount:"1 tsp (5 mL) chocolate shavings",                     word:"Fudge"},
-  {id:"mint",   name:"Crushed peppermint", amount:"1 tsp (5 mL) crushed peppermint (crushed candy cane)", word:"Peppermint Crunch"},
-  {id:"cinn",   name:"Cinnamon",           amount:"1 pinch (about 1/8 tsp / 0.5 mL) ground cinnamon",    word:"Cinnamon Spice"},
-  {id:"spr",    name:"Festive sprinkles",  amount:"1/2 tsp (2 mL) festive sprinkles",                    word:"Sprinkle Party"}
+  {id:"cream",  name:"Whipped cream",      amount:"2 tbsp (30 mL) whipped cream",                        word:"Cloud", short:"whipped cream"},
+  {id:"marsh",  name:"Mini marshmallows",  amount:"2 tbsp (30 mL) mini marshmallows",                    word:"Marshmallow", short:"mini marshmallows"},
+  {id:"choc",   name:"Chocolate shavings", amount:"1 tsp (5 mL) chocolate shavings",                     word:"Fudge", short:"chocolate shavings"},
+  {id:"mint",   name:"Crushed peppermint", amount:"1 tsp (5 mL) crushed peppermint (crushed candy cane)", word:"Peppermint Crunch", short:"crushed peppermint"},
+  {id:"cinn",   name:"Cinnamon",           amount:"1 pinch (about 1/8 tsp / 0.5 mL) ground cinnamon, or 1 cinnamon stick for stirring",    word:"Cinnamon Spice", short:"cinnamon"},
+  {id:"spr",    name:"Festive sprinkles",  amount:"1/2 tsp (2 mL) festive sprinkles",                    word:"Sprinkle Party", short:"sprinkles"}
 ];
 const BASE = [
   "1 cup (250 mL) milk",
@@ -219,9 +226,9 @@ const ADJ = ["Magical","Merry","Twinkly","Jolly","Sparkly","Cozy","Snowy","Dream
 const NOUN = ["Cocoa","Dream","Delight","Wonder","Swirl","Cup of Cheer","Hug in a Mug","Surprise"];
 
 /* ===== State ===== */
-let state = {mug:"mug_cane", tops:["cream","marsh"], name:"", custom:false};
+let state = {mug:"mug_cane", tops:["cream","marsh"], name:"", custom:false, child:""};
 try{ const s = JSON.parse(localStorage.getItem(STORE_KEY)||"null");
-  if(s && MUGS.some(m=>m.id===s.mug)){ state.mug=s.mug; state.tops=(s.tops||[]).filter(t=>TOPS.some(x=>x.id===t)); state.name=String(s.name||"").slice(0,40); state.custom=!!s.custom; }
+  if(s && MUGS.some(m=>m.id===s.mug)){ state.mug=s.mug; state.tops=(s.tops||[]).filter(t=>TOPS.some(x=>x.id===t)); state.name=String(s.name||"").slice(0,40); state.custom=!!s.custom; state.child=String(s.child||"").slice(0,20); }
 }catch(e){}
 function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
 const $ = id => document.getElementById(id);
@@ -379,13 +386,13 @@ function buildUI(){
     };
     topsEl.appendChild(b);
   });
+  $("child").addEventListener("input",e=>{ state.child=e.target.value.slice(0,20); save(); });
   $("name").addEventListener("input",e=>{ state.name=e.target.value.slice(0,40); state.custom=state.name.trim().length>0; save(); });
   $("dice").onclick=newName;
   $("make").onclick=showRecipe;
   $("closeRecipe").onclick=()=>{ $("recipe").classList.remove("on"); };
   $("printBtn").onclick=()=>{ window.print(); };
   $("pdfBtn").onclick=downloadPDF;
-  $("pngBtn").onclick=downloadPNG;
   $("backBtn").onclick=goBack;
   $("backOk").onclick=()=>$("backModal").classList.remove("on");
 }
@@ -403,91 +410,132 @@ function goBack(){
 }
 
 /* ===== Recipe card ===== */
-const CW=1275, CH=1650;
+const CW=1500, CH=2100;   // 5 x 7 in at 300 dpi
 function wrap(ctx, text, maxW){
   const words=text.split(" "), lines=[]; let line="";
   for(const w of words){ const t=line?line+" "+w:w; if(ctx.measureText(t).width>maxW && line){ lines.push(line); line=w; } else line=t; }
   if(line) lines.push(line); return lines;
 }
 function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
-function cardName(){ return (state.name||"").trim() || "My Magical Hot Cocoa"; }
+function cardName(){ return (state.name||"").trim() || "Magical Hot Cocoa"; }
+function cardTitle(){
+  const n=(state.child||"").trim();
+  if(!n) return "My Magical Christmas Cocoa";
+  return n+(/s$/i.test(n)?"’":"’s")+" Magical Christmas Cocoa";
+}
+function joinList(a){ return a.length>1 ? a.slice(0,-1).join(", ")+" and "+a[a.length-1] : (a[0]||""); }
 function steps(){
-  const sel=TOPS.filter(t=>state.tops.includes(t.id)).map(t=>t.name.toLowerCase());
-  const list = sel.length>1 ? sel.slice(0,-1).join(", ")+" and "+sel[sel.length-1] : sel[0];
+  const others=TOPS.filter(t=>t.id!=="cream" && state.tops.includes(t.id)).map(t=>t.short);
+  let last;
+  if(state.tops.includes("cream")) last="Top with the whipped cream"+(others.length?", then add the "+joinList(others):"")+".";
+  else if(others.length) last="Add the "+joinList(others)+".";
+  else last="Enjoy it plain and simple!";
   return [
-    "Grown-up step: warm the milk in a small saucepan over medium-low heat until it is hot and steaming, but not boiling.",
-    "Grown-up step: whisk in the cocoa powder, sugar and chocolate chips until everything is melted and smooth.",
-    "Grown-up step: take the pan off the heat.",
-    "Stir in the vanilla extract, if you like.",
-    "Grown-up step: carefully pour the hot cocoa into your mug.",
-    sel.length ? "Add your toppings: "+list+". Let it cool to a safe sipping temperature, then enjoy!" : "Enjoy it plain and simple! Let it cool to a safe sipping temperature before sipping."
+    "Grown-up: warm the milk in a small pot over medium-low heat until it is steaming, but not boiling.",
+    "Grown-up: whisk in the cocoa powder, sugar and chocolate chips until smooth.",
+    "Grown-up: take the pot off the heat.",
+    "Stir in the vanilla, if you like.",
+    "Grown-up: carefully pour the cocoa into your mug.",
+    last+" Wait until it is just warm, then sip and enjoy!"
   ];
+}
+function paintCard(x, f){
+  const W=CW, H=CH, serif="Georgia, 'Times New Roman', serif";
+  // candy cane frame
+  x.fillStyle="#fff"; x.fillRect(0,0,W,H);
+  x.save(); x.beginPath(); x.rect(0,0,W,H); x.rect(44,44,W-88,H-88); x.clip("evenodd");
+  x.fillStyle="#D6243A"; for(let i=-H;i<W+H;i+=64){ x.beginPath(); x.moveTo(i,0); x.lineTo(i+32,0); x.lineTo(i+32-H,H); x.lineTo(i-H,H); x.closePath(); x.fill(); }
+  x.restore();
+  x.fillStyle="#FFF8EC"; x.fillRect(44,44,W-88,H-88);
+  // pink scallops top & bottom, mint scallops sides
+  x.fillStyle="#F7A8C4";
+  const nS=22; for(let i=0;i<=nS;i++){ const cx=44+i*(W-88)/nS; x.beginPath(); x.arc(cx,44,30,0,Math.PI); x.fill(); x.beginPath(); x.arc(cx,H-44,30,Math.PI,Math.PI*2); x.fill(); }
+  x.fillStyle="#BFEBDD";
+  const nV=30; for(let i=1;i<nV;i++){ const cy=44+i*(H-88)/nV; x.beginPath(); x.arc(44,cy,18,-Math.PI/2,Math.PI/2); x.fill(); x.beginPath(); x.arc(W-44,cy,18,Math.PI/2,Math.PI*1.5); x.fill(); }
+  // fine gold border with corner dots
+  x.strokeStyle="#D2A24C"; x.lineWidth=3; x.strokeRect(92,100,W-184,H-200);
+  x.lineWidth=1.5; x.strokeRect(104,112,W-208,H-224);
+  x.fillStyle="#D2A24C"; [[92,100],[W-92,100],[92,H-100],[W-92,H-100]].forEach(([a,b])=>{ x.beginPath(); x.arc(a,b,9,0,Math.PI*2); x.fill(); });
+  // bow at the top
+  const bw=196, bh=bw*IMG.bow.height/IMG.bow.width; x.drawImage(IMG.bow, W/2-bw/2, 30, bw, bh);
+  x.textAlign="center";
+  let y=30+bh+30;
+  x.fillStyle="#2E9C7E"; x.font="bold "+Math.round(28*f)+"px "+serif;
+  x.fillText("C A N D Y   C A N E   L A N E   ·   D A Y   4", W/2, y); y+=Math.round(34*f);
+  // title
+  let ts=Math.round(86*f); x.font="italic "+ts+"px "+serif;
+  let tl=wrap(x, cardTitle(), W-300);
+  while((tl.length>2 && ts>50) || (tl.length>1 && ts>64)){ ts-=4; x.font="italic "+ts+"px "+serif; tl=wrap(x, cardTitle(), W-300); }
+  x.fillStyle="#8C1530"; tl.slice(0,2).forEach(l=>{ y+=ts*1.04; x.fillText(l, W/2, y); });
+  // fun name
+  y+=Math.round(74*f); let ns=Math.round(48*f); x.font="italic "+ns+"px "+serif;
+  const fun="“"+cardName()+"”";
+  while(x.measureText(fun).width>W-300 && ns>30){ ns-=2; x.font="italic "+ns+"px "+serif; }
+  x.fillStyle="#C2335D"; x.fillText(fun, W/2, y);
+  y+=Math.round(48*f); x.fillStyle="#6b4a54"; x.font=Math.round(30*f)+"px "+serif;
+  const mug=MUGS.find(m=>m.id===state.mug);
+  x.fillText("Classic chocolate cocoa  ·  "+mug.name+" mug  ·  Makes 1 mug", W/2, y);
+  // divider with peppermint dot
+  y+=Math.round(40*f);
+  x.strokeStyle="#D2A24C"; x.lineWidth=2.5; x.beginPath(); x.moveTo(200,y); x.lineTo(W/2-26,y); x.moveTo(W/2+26,y); x.lineTo(W-200,y); x.stroke();
+  x.fillStyle="#D6243A"; x.beginPath(); x.arc(W/2,y,11,0,Math.PI*2); x.fill(); x.fillStyle="#fff"; x.beginPath(); x.arc(W/2,y,5,0,Math.PI*2); x.fill();
+  y+=Math.round(36*f);
+  const midTop=y;
+  // left: mug picture in a pink circle, with peppermint + marshmallow accents
+  const R=Math.round(232*f), mcx=150+R+10, mcy=midTop+R+20;
+  x.fillStyle="#FDE3EC"; x.beginPath(); x.arc(mcx,mcy,R,0,Math.PI*2); x.fill();
+  x.strokeStyle="#F7A8C4"; x.lineWidth=6; x.setLineDash([2,16]); x.lineCap="round"; x.beginPath(); x.arc(mcx,mcy,R+16,0,Math.PI*2); x.stroke(); x.setLineDash([]);
+  const M=META[state.mug], mw=Math.round(R*1.5), mh=mw*M.h/M.w;
+  drawMug(x, state.mug, state.tops, mcx-mw*.44, mcy+R*.72-mh, mw, null);
+  const pw=Math.round(150*f), ph=pw*IMG.pep.height/IMG.pep.width; x.drawImage(IMG.pep, mcx-R-30, mcy+R-ph*.75, pw, ph);
+  [[mcx+R*.62,mcy+R*.88,.0,62],[mcx+R*.9,mcy+R*.62,.5,54]].forEach(([a,b,r,s],i)=>sprite(x,"marsh",i+1,a,b,s*f,r));
+  x.fillStyle="#8C1530"; x.font="italic "+Math.round(32*f)+"px "+serif; x.fillText(mug.name+" mug", mcx, mcy+R+Math.round(66*f));
+  const leftBottom=mcy+R+Math.round(80*f);
+  // right: ingredients
+  x.textAlign="left";
+  const ix=mcx+R+70, iw=W-150-ix; let iy=midTop+Math.round(40*f);
+  const fs=Math.round(34*f), lh=Math.round(41*f);
+  const head=t=>{ x.fillStyle="#8C1530"; x.font="bold "+Math.round(42*f)+"px "+serif; x.fillText(t, ix, iy); iy+=Math.round(52*f); };
+  const bullet=(t,color)=>{ x.font=fs+"px "+serif; wrap(x,t,iw-30).forEach((l,i)=>{ if(i===0){ x.fillStyle=color; x.beginPath(); x.arc(ix+9,iy-fs*.32,Math.round(8*f),0,Math.PI*2); x.fill(); } x.fillStyle="#4A2230"; x.fillText(l, ix+30, iy); iy+=lh; }); iy+=Math.round(6*f); };
+  head("Ingredients");
+  BASE.forEach(t=>bullet(t,"#5FD6B3"));
+  iy+=Math.round(14*f); head("Your toppings");
+  const sel=TOPS.filter(t=>state.tops.includes(t.id));
+  if(sel.length) sel.forEach(t=>bullet(t.amount,"#F7A8C4"));
+  else { x.fillStyle="#6b4a54"; x.font="italic "+fs+"px "+serif; x.fillText("No toppings — classic cocoa!", ix+30, iy); iy+=lh; }
+  y=Math.max(leftBottom, iy)+Math.round(8*f);
+  // instructions
+  x.strokeStyle="#D2A24C"; x.lineWidth=2.5; x.beginPath(); x.moveTo(150,y); x.lineTo(W-150,y); x.stroke();
+  y+=Math.round(56*f);
+  x.fillStyle="#8C1530"; x.font="bold "+Math.round(42*f)+"px "+serif; x.fillText("How to make it", 150, y); y+=Math.round(58*f);
+  steps().forEach((s,i)=>{
+    const r=Math.round(22*f);
+    x.fillStyle=i%2?"#2E9C7E":"#8C1530"; x.beginPath(); x.arc(150+r,y-fs*.32,r,0,Math.PI*2); x.fill();
+    x.fillStyle="#fff"; x.font="bold "+Math.round(26*f)+"px "+serif; x.textAlign="center"; x.fillText(String(i+1),150+r,y-fs*.32+Math.round(9*f)); x.textAlign="left";
+    x.fillStyle="#4A2230"; x.font=fs+"px "+serif;
+    wrap(x,s,W-150-(150+2*r+22)).forEach(l=>{ x.fillText(l,150+2*r+22,y); y+=lh; }); y+=Math.round(10*f);
+  });
+  // safety box
+  y+=Math.round(12*f);
+  const sfs=Math.round(31*f), slh=Math.round(40*f);
+  x.font=sfs+"px "+serif;
+  const sl=wrap(x,"Hot milk and hot cocoa can burn. An adult does all the stove-top steps and the pouring. Let your cocoa cool before sipping, and check food labels for allergies.",W-300-60);
+  const bh2=Math.round(70*f)+sl.length*slh+Math.round(22*f);
+  x.fillStyle="#DDF6EC"; roundRect(x,150,y,W-300,bh2,26); x.fill(); x.strokeStyle="#5FD6B3"; x.lineWidth=3; x.stroke();
+  x.fillStyle="#2E7A64"; x.font="bold "+Math.round(34*f)+"px "+serif; x.fillText("♥  Grown-up helper needed!", 180, y+Math.round(52*f));
+  x.font=sfs+"px "+serif; x.fillStyle="#3c4a46"; let sy=y+Math.round(52*f)+slh;
+  sl.forEach(l=>{ x.fillText(l,180,sy); sy+=slh; });
+  const bottom=y+bh2;
+  // footer
+  x.textAlign="center"; x.fillStyle="#8C1530"; x.font="italic "+Math.round(28*f)+"px "+serif;
+  x.fillText("Made at the Candy Cane Lane Magical Hot Cocoa Station", W/2, H-128);
+  return bottom;
 }
 function drawCard(){
   const c=document.createElement("canvas"); c.width=CW; c.height=CH; const x=c.getContext("2d");
-  // candy cane frame
-  x.fillStyle="#fff"; x.fillRect(0,0,CW,CH);
-  x.save(); x.beginPath(); x.rect(0,0,CW,CH); x.rect(34,34,CW-68,CH-68); x.clip("evenodd");
-  x.fillStyle="#D6243A"; for(let i=-CH;i<CW+CH;i+=56){ x.beginPath(); x.moveTo(i,0); x.lineTo(i+28,0); x.lineTo(i+28-CH,CH); x.lineTo(i-CH,CH); x.closePath(); x.fill(); }
-  x.restore();
-  x.fillStyle="#FFF8EC"; x.fillRect(34,34,CW-68,CH-68);
-  x.strokeStyle="#F7A8C4"; x.lineWidth=6; x.strokeRect(37,37,CW-74,CH-74);
-  x.strokeStyle="#D9A94A"; x.lineWidth=2; x.strokeRect(54,54,CW-108,CH-108);
-  // scallops under the top
-  x.fillStyle="#F7A8C4"; for(let i=0;i<24;i++){ const cx=60+i*(CW-120)/23; x.beginPath(); x.arc(cx,58,22,0,Math.PI); x.fill(); }
-  x.textAlign="center"; x.fillStyle="#2E9C7E";
-  x.font="bold 26px Georgia, serif"; x.fillText("C A N D Y   C A N E   L A N E   ·   D A Y   4", CW/2, 140);
-  x.fillStyle="#8C1530";
-  let fs=74; x.font="italic "+fs+"px Georgia, serif";
-  while(x.measureText(cardName()).width>CW-200 && fs>40){ fs-=2; x.font="italic "+fs+"px Georgia, serif"; }
-  const nameLines = wrap(x, cardName(), CW-200).slice(0,2);
-  let ty=225; nameLines.forEach(l=>{ x.fillText(l, CW/2, ty); ty+=fs*1.1; });
-  x.fillStyle="#6b4a54"; x.font="26px Georgia, serif"; x.fillText("A magical hot cocoa recipe  ·  Makes 1 mug", CW/2, ty+2);
-  const top=ty+40;
-  // gold divider
-  x.strokeStyle="#D9A94A"; x.lineWidth=2; x.beginPath(); x.moveTo(200,top-12); x.lineTo(CW-200,top-12); x.stroke();
-  // mug on pink circle (left)
-  const mcx=330, mcy=top+250;
-  x.fillStyle="#FDE3EC"; x.beginPath(); x.arc(mcx,mcy,225,0,Math.PI*2); x.fill();
-  x.strokeStyle="#F7A8C4"; x.lineWidth=5; x.setLineDash([2,14]); x.lineCap="round"; x.beginPath(); x.arc(mcx,mcy,240,0,Math.PI*2); x.stroke(); x.setLineDash([]);
-  const M=META[state.mug], mw=330, mh=mw*M.h/M.w;
-  drawMug(x, state.mug, state.tops, mcx-mw*.44, mcy+mh*.62-mh+30, mw, null);
-  const mug=MUGS.find(m=>m.id===state.mug);
-  x.fillStyle="#8C1530"; x.font="italic 26px Georgia, serif"; x.fillText(mug.name+" mug", mcx, mcy+275);
-  // ingredients (right)
-  x.textAlign="left";
-  let ix=620, iy=top+30;
-  const head=(t,y)=>{ x.fillStyle="#8C1530"; x.font="bold 34px Georgia, serif"; x.fillText(t, ix, y); };
-  head("Ingredients", iy); iy+=48;
-  x.font="25px Georgia, serif"; x.fillStyle="#4A2230";
-  const bullet=(t,color)=>{ wrap(x,t,520).forEach((l,i)=>{ if(i===0){ x.fillStyle=color; x.beginPath(); x.arc(ix+8,iy-8,6,0,Math.PI*2); x.fill(); } x.fillStyle="#4A2230"; x.fillText(l, ix+26, iy); iy+=34; }); iy+=4; };
-  BASE.forEach(t=>bullet(t,"#5FD6B3"));
-  iy+=14; head("Your toppings", iy); iy+=46; x.font="25px Georgia, serif";
-  const sel=TOPS.filter(t=>state.tops.includes(t.id));
-  if(sel.length) sel.forEach(t=>bullet(t.amount,"#F7A8C4"));
-  else { x.fillStyle="#6b4a54"; x.font="italic 25px Georgia, serif"; x.fillText("No toppings — classic cocoa!", ix+26, iy); iy+=38; }
-  // instructions
-  let y=Math.max(iy+30, top+560);
-  x.strokeStyle="#D9A94A"; x.lineWidth=2; x.beginPath(); x.moveTo(110,y-34); x.lineTo(CW-110,y-34); x.stroke();
-  x.fillStyle="#8C1530"; x.font="bold 34px Georgia, serif"; x.fillText("How to make it", 110, y+6); y+=54;
-  x.font="25px Georgia, serif";
-  steps().forEach((s,i)=>{
-    x.fillStyle="#8C1530"; x.beginPath(); x.arc(128,y-9,19,0,Math.PI*2); x.fill();
-    x.fillStyle="#fff"; x.font="bold 22px Georgia, serif"; x.textAlign="center"; x.fillText(String(i+1),128,y-1); x.textAlign="left";
-    x.fillStyle="#4A2230"; x.font="25px Georgia, serif";
-    wrap(x,s,CW-300).forEach(l=>{ x.fillText(l,166,y); y+=34; }); y+=10;
-  });
-  // safety box
-  y+=10; const bh=146;
-  x.fillStyle="#DDF6EC"; roundRect(x,100,y,CW-200,bh,24); x.fill();
-  x.strokeStyle="#5FD6B3"; x.lineWidth=3; x.stroke();
-  x.fillStyle="#2E7A64"; x.font="bold 27px Georgia, serif"; x.fillText("Grown-up helper needed!", 130, y+44);
-  x.font="23px Georgia, serif"; x.fillStyle="#3c4a46";
-  let sy=y+80;
-  wrap(x,"Hot milk and hot cocoa can burn. An adult should do all the stove-top steps and the pouring. Always let your cocoa cool before sipping, and check every label for allergies.",CW-270).forEach(l=>{ x.fillText(l,130,sy); sy+=31; });
-  // footer
-  x.textAlign="center"; x.fillStyle="#8C1530"; x.font="italic 24px Georgia, serif";
-  x.fillText("Made at the Candy Cane Lane Magical Hot Cocoa Station", CW/2, CH-82);
+  let f=1;
+  for(;f>.7;f-=.03){ if(paintCard(x,f)<=CH-172) break; }   // shrink text only if needed so nothing is clipped
+  paintCard(x,f); c.__fit=f;
   return c;
 }
 let cardCanvas=null;
@@ -498,19 +546,18 @@ function showRecipe(){
   $("cardImg").src=url; $("printImg").src=url;
   $("recipe").classList.add("on"); $("recipe").scrollTop=0;
 }
-function fileBase(){ return (cardName().replace(/[^A-Za-z0-9]+/g,"-").replace(/^-|-$/g,"")||"Hot-Cocoa")+"-Recipe"; }
+function fileBase(){ return (cardTitle().replace(/[^A-Za-z0-9]+/g,"-").replace(/^-|-$/g,"")||"Hot-Cocoa")+"-Recipe"; }
 function saveBlob(blob, name){
   const a=document.createElement("a"); const u=URL.createObjectURL(blob);
   a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(u), 60000);
 }
-function downloadPNG(){ if(!cardCanvas) cardCanvas=drawCard(); cardCanvas.toBlob(b=>saveBlob(b, fileBase()+".png"), "image/png"); }
 function downloadPDF(){
   if(!cardCanvas) cardCanvas=drawCard();
   const jpg=atob(cardCanvas.toDataURL("image/jpeg",0.92).split(",")[1]);
   const img=new Uint8Array(jpg.length); for(let i=0;i<jpg.length;i++) img[i]=jpg.charCodeAt(i);
-  // US Letter page, 0.4in margins, image centred
-  const PW=612, PH=792, m=28.8, sc=Math.min((PW-2*m)/CW,(PH-2*m)/CH), w=CW*sc, h=CH*sc, ox=(PW-w)/2, oy=(PH-h)/2;
+  // 5 x 7 inch page, card fills it exactly (prints at real size)
+  const PW=360, PH=504, w=PW, h=PH, ox=0, oy=0;
   const content=`q ${w.toFixed(2)} 0 0 ${h.toFixed(2)} ${ox.toFixed(2)} ${oy.toFixed(2)} cm /Im0 Do Q`;
   const enc=new TextEncoder(); const parts=[]; const offs=[]; let len=0;
   const push=x=>{ const b=typeof x==="string"?enc.encode(x):x; parts.push(b); len+=b.length; };
@@ -530,11 +577,11 @@ function downloadPDF(){
 
 /* ===== Start ===== */
 Promise.all([
-  loadImg("bg","assets/counter.webp"), loadImg("cream","assets/cream.webp"), loadImg("atlas","assets/toppings.webp"),
+  loadImg("bg","assets/counter.webp"), loadImg("cream","assets/cream.webp"), loadImg("atlas","assets/toppings.webp"), loadImg("bow","assets/bow.webp"), loadImg("pep","assets/pep.webp"),
   ...MUGS.map(m=>loadImg(m.id,"assets/"+m.id+".webp"))
 ]).then(()=>{
   prepCream(); makeLayout(); buildUI();
-  if(!state.name) newName(); $("name").value=state.name;
+  if(!state.name) newName(); $("name").value=state.name; $("child").value=state.child;
   sync(); render();
   $("loading").style.display="none"; window.__ready=true;
 }).catch(e=>{ $("loading").textContent="Sorry, the cocoa station couldn't open. ("+e.message+")"; });
