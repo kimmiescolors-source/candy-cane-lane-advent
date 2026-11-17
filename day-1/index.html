@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Day 1 · The Secret Invitation · Candy Cane Lane</title>
+<style>
+@font-face{font-family:"CCLScript";src:url("assets/great-vibes-latin-400-normal.woff2") format("woff2");font-display:swap}
+:root{--cran:#8C1530;--red:#D6243A;--mint:#5FD6B3;--mintsoft:#DDF6EC;--mintdeep:#2E9C7E;--pink:#F7A8C4;--pinksoft:#FDE3EC;--ivory:#FFF8EC;--gold:#C9973F;--ink:#4A2230}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--ivory);color:var(--ink);font-family:Georgia,"Times New Roman",serif;-webkit-text-size-adjust:100%}
+button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.stripe{height:14px;background:repeating-linear-gradient(-45deg,var(--red) 0 14px,#fff 14px 28px);box-shadow:0 2px 0 var(--pink)}
+header{display:flex;align-items:center;gap:12px;padding:10px 16px;max-width:900px;margin:0 auto}
+header h1{flex:1;margin:0;text-align:center;font-weight:normal;font-style:italic;color:var(--cran);font-size:clamp(19px,3vw,28px)}
+header h1 small{display:block;font-style:normal;font-size:.5em;letter-spacing:.18em;text-transform:uppercase;color:var(--mintdeep)}
+.back{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:2px solid var(--cran);background:#fff;color:var(--cran);border-radius:999px;padding:9px 14px;font-size:15px;min-height:44px;min-width:44px;white-space:nowrap}
+.spacer{width:120px}
+main{max-width:620px;margin:0 auto;padding:4px 14px 30px}
+.stage{position:relative;aspect-ratio:4/5;border-radius:22px;overflow:hidden;box-shadow:0 0 0 4px #fff,0 0 0 7px var(--pink),0 14px 30px rgba(140,21,48,.18);background:url(assets/counter.webp) center/cover var(--mintsoft)}
+.banner{position:absolute;left:50%;top:21%;transform:translateX(-50%);width:66%;text-align:center;background:var(--ivory);border:2px solid var(--gold);border-radius:18px;padding:12px 10px 10px;box-shadow:0 6px 16px rgba(140,21,48,.15)}
+.banner small{display:block;margin-top:2px;font-size:clamp(10px,2.4vw,13px);letter-spacing:.2em;white-space:nowrap;color:var(--mintdeep);text-transform:uppercase}
+.banner b{display:block;font-family:"CCLScript",cursive;font-weight:normal;color:var(--cran);font-size:clamp(34px,8.6vw,52px);line-height:1.1;white-space:nowrap}
+.env{position:absolute;left:50%;bottom:14%;width:60%;transform:translateX(-50%);border:none;background:none;padding:0;filter:drop-shadow(0 10px 10px rgba(90,30,40,.25))}
+.env img{display:block;width:100%;height:auto}
+.env .open{position:absolute;left:0;bottom:0;opacity:0}
+.env.idle{animation:bob 2.6s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0) rotate(-1deg)}50%{transform:translate(-50%,-8px) rotate(1deg)}}
+.to{position:absolute;left:6%;top:50%;background:#fff;border:1.5px solid var(--gold);color:var(--cran);border-radius:10px;padding:4px 10px;font-size:clamp(13px,3.4vw,17px);font-style:italic;transform:rotate(-6deg);box-shadow:0 3px 8px rgba(0,0,0,.12);max-width:46%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tap{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);background:var(--cran);color:#fff;border-radius:999px;padding:10px 20px;font-size:16px;pointer-events:none;box-shadow:0 4px 0 #5e0d20;white-space:nowrap}
+.spark{position:absolute;width:10px;height:10px;pointer-events:none;background:radial-gradient(circle,#fff 0 30%,rgba(255,230,160,.9) 31% 50%,transparent 51%);animation:tw 1.8s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:1;transform:scale(1.4)}}
+.letter{position:absolute;left:50%;bottom:22%;width:50%;height:30%;transform:translate(-50%,0);background:var(--ivory);border:2px solid var(--gold);border-radius:6px;opacity:0;box-shadow:0 4px 10px rgba(0,0,0,.12)}
+.letter::before{content:"You're Invited!";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"CCLScript",cursive;color:var(--cran);font-size:clamp(18px,5vw,30px)}
+/* opening sequence */
+.stage.opening .env{animation:wiggle .5s ease-in-out}
+@keyframes wiggle{0%,100%{transform:translateX(-50%) rotate(0)}25%{transform:translateX(-50%) rotate(-4deg)}75%{transform:translateX(-50%) rotate(4deg)}}
+.stage.opened .env .closed{opacity:0;transition:opacity .45s}
+.stage.opened .env .open{opacity:1;transition:opacity .45s}
+.stage.opened .letter{opacity:1;transform:translate(-50%,-62%);transition:transform 1s cubic-bezier(.2,.8,.2,1) .45s,opacity .3s .4s;z-index:3}
+.stage.opened .tap,.stage.opened .banner,.stage.opened .to{opacity:0;transition:opacity .4s}
+/* invitation */
+.inv{position:fixed;inset:0;z-index:40;display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:18px 12px 40px;background:rgba(74,34,48,.55);-webkit-overflow-scrolling:touch}
+.inv.on{display:flex}
+.card{position:relative;width:100%;max-width:520px;background:#fff;padding:14px;border-radius:6px;box-shadow:0 20px 50px rgba(0,0,0,.35);
+  background:repeating-linear-gradient(-45deg,var(--red) 0 12px,var(--ivory) 12px 24px);animation:rise .7s cubic-bezier(.2,.8,.2,1)}
+@keyframes rise{from{transform:translateY(40px) scale(.92);opacity:0}to{transform:none;opacity:1}}
+.paper{position:relative;background:var(--ivory);padding:92px 30px 30px;text-align:center;
+  -webkit-mask:radial-gradient(circle 9px at 9px 50%,transparent 98%,#000) -9px 0/100% 26px;}
+.paper{-webkit-mask:none}
+.scal{position:absolute;left:0;right:0;height:16px;background:radial-gradient(circle at 50% 0,var(--pink) 0 11px,transparent 12px) 0 0/26px 16px repeat-x}
+.scal.t{top:0}.scal.b{bottom:0;transform:scaleY(-1)}
+.gold{position:absolute;inset:22px 12px;border:1.5px solid var(--gold);pointer-events:none}
+.gold::after{content:"";position:absolute;inset:5px;border:1px solid rgba(201,151,63,.5)}
+.bowimg{position:absolute;left:50%;top:-4px;width:96px;transform:translateX(-50%)}
+.k{font-size:11px;letter-spacing:.16em;color:var(--mintdeep);text-transform:uppercase;margin:6px 0 2px}
+.title{font-family:"CCLScript",cursive;color:var(--cran);font-size:58px;line-height:1.1;margin:2px 0 10px}
+.dear{font-size:21px;color:var(--cran);font-style:italic;margin:6px 0 12px}
+.body p{font-size:17.5px;line-height:1.6;margin:0 0 12px;color:var(--ink)}
+.body .secret{color:var(--cran);font-style:italic}
+.sign{margin-top:18px;font-size:16px;color:#6b4a54;font-style:italic}
+.sign b{display:block;font-family:"CCLScript",cursive;font-weight:normal;font-style:normal;font-size:34px;color:var(--cran);margin-top:2px}
+.pep{width:58px;display:block;margin:12px auto 0}
+.actions{display:flex;flex-direction:column;gap:10px;margin-top:14px;background:var(--ivory);border-radius:6px;padding:14px}
+.btn{min-height:52px;border-radius:999px;border:none;background:var(--cran);color:#fff;font-size:18px;padding:0 22px;box-shadow:0 4px 0 #5e0d20}
+.btn.ghost{background:#fff;color:var(--cran);border:2px solid var(--cran);box-shadow:none;font-size:16px}
+.edit{background:none;border:none;color:#6b4a54;text-decoration:underline;font-size:14px;min-height:44px}
+/* grown-up name sheet */
+.modal{position:fixed;inset:0;z-index:60;background:rgba(74,34,48,.55);display:none;align-items:center;justify-content:center;padding:18px}
+.modal.on{display:flex}
+.sheet{background:#fff;border-radius:20px;padding:22px;max-width:400px;width:100%;box-shadow:0 0 0 4px var(--pink);text-align:center}
+.sheet h2{margin:0 0 6px;color:var(--cran);font-weight:normal;font-style:italic}
+.sheet p{margin:0 0 14px;font-size:15px;color:#6b4a54;line-height:1.45}
+.sheet input{width:100%;font-family:inherit;font-size:20px;color:var(--cran);border:2px solid var(--pink);border-radius:14px;padding:12px;text-align:center;background:var(--ivory)}
+.sheet .row{display:flex;gap:10px;margin-top:14px}
+.sheet .row .btn{flex:1}
+.sheet.ns{position:relative;background:var(--ivory);box-shadow:0 18px 40px rgba(74,34,48,.3);border:2px solid var(--gold);outline:1px solid rgba(201,151,63,.55);outline-offset:-8px;padding:44px 24px 24px}
+.sheet.ns .nspep{position:absolute;left:50%;top:-30px;width:84px;transform:translateX(-50%);filter:drop-shadow(0 3px 4px rgba(0,0,0,.15))}
+.sheet.ns h2{font-family:"CCLScript",cursive;font-style:normal;font-size:38px;line-height:1.1}
+.sheet.ns input{background:#fff;border:1.5px solid var(--gold)}
+.sheet.ns input:focus{outline:3px solid var(--pinksoft);border-color:var(--cran)}
+.sheet.ns .btn.ghost{background:#fff}
+@media (max-width:480px){.back span{display:none}.spacer{display:none}.title{font-size:48px}.paper{padding:86px 20px 26px}.body p{font-size:16.5px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="stripe"></div>
+<header>
+  <button class="back" id="backBtn" aria-label="Back to the Sweet Shop">&#8592; <span>Back to the Sweet Shop</span></button>
+  <h1><small>Day 1 &middot; Candy Cane Lane</small>The Secret Invitation</h1>
+  <div class="spacer"></div>
+</header>
+<main>
+  <div class="stage" id="stage">
+    <div class="banner"><b>Special Delivery!</b><small>From the North Pole</small></div>
+    <div class="letter" aria-hidden="true"></div>
+    <button class="env idle" id="env" aria-label="Open your special delivery">
+      <img class="closed" src="assets/env_closed.webp" alt="">
+      <img class="open" src="assets/env_open.webp" alt="">
+      <span class="to" id="toTag"></span>
+    </button>
+    <div class="tap" id="tapHint">Tap the envelope to open &#10024;</div>
+  </div>
+</main>
+
+<div class="inv" id="inv" role="dialog" aria-modal="true" aria-labelledby="invTitle">
+  <div class="card">
+    <div class="paper">
+      <div class="scal t"></div><div class="scal b"></div><div class="gold"></div>
+      <img class="bowimg" src="assets/bow.webp" alt="">
+      <div class="k">Special delivery from the North Pole</div>
+      <div class="title" id="invTitle">You're Invited!</div>
+      <div class="dear" id="dear">Dear Sweet Friend,</div>
+      <div class="body">
+        <p>The ovens are warm, the peppermint is swirling, and the sweetest little shop at the North Pole has opened its doors just for you!</p>
+        <p>Every day until Christmas, a new surprise will be waiting inside Candy Cane Lane.</p>
+        <p>Some will make you laugh, some will make you create, and some might even bring a little Christmas magic into your home.</p>
+        <p class="secret">And on Christmas Eve? Well, that's a very special secret.</p>
+      </div>
+      <div class="sign">With sugar, sparkle, and Christmas wishes,<b>The Candy Cane Lane Sweet Shop</b></div>
+      <img class="pep" src="assets/pep.webp" alt="">
+    </div>
+    <div class="actions">
+      <button class="btn" id="backBtn2">&#8592; Back to the Sweet Shop</button>
+      <button class="btn ghost" id="again">Open it again &#10024;</button>
+      <button class="edit" id="editName">Grown-ups: change the name</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="nameSheet" role="dialog" aria-modal="true" aria-labelledby="nsT">
+  <div class="sheet ns">
+    <img class="nspep" src="assets/pep.webp" alt="">
+    <h2 id="nsT">For grown-ups</h2>
+    <p>Who is this invitation for? Type your child's first name and it will appear on their invitation. It's saved only on this device.</p>
+    <input id="nameIn" maxlength="20" autocomplete="off" placeholder="First name" aria-label="Child's first name">
+    <div class="row"><button class="btn ghost" id="skip">Skip</button><button class="btn" id="saveName">Save</button></div>
+  </div>
+</div>
+
+<div class="modal" id="backModal" role="dialog" aria-modal="true">
+  <div class="sheet"><h2>Back to the Sweet Shop</h2><p>Your Sweet Shop is still open in your other tab. Close this tab to go back to it.</p><button class="btn" id="backOk">OK</button></div>
+</div>
+
+<script>
+const SHOP_URL="";
+const ALLOWED_RETURN_HOSTS=["canva.site","canva.com","canva.link"];
+const RETURN_KEY="candycanelane-return-url";
+const NAME_KEY="candycanelane-child-name";        // shared by all days
+const ASKED_KEY="candycanelane-name-asked";
+function validReturnUrl(raw){try{if(!raw||raw.length>500)return null;const u=new URL(raw);if(u.protocol!=="https:"||u.username||u.password)return null;const h=u.hostname.toLowerCase();if(!ALLOWED_RETURN_HOSTS.some(a=>h===a||h.endsWith("."+a)))return null;return u.href;}catch(e){return null;}}
+function readParam(n){try{const q=new URLSearchParams(location.search).get(n);if(q)return q;return new URLSearchParams(location.hash.replace(/^#/,"")).get(n);}catch(e){return null;}}
+function resolveReturnUrl(){const fl=validReturnUrl(readParam("return"));if(fl){try{localStorage.setItem(RETURN_KEY,fl);}catch(e){}return fl;}
+ let fr=null;try{if(document.referrer)fr=validReturnUrl(new URL(document.referrer).origin+"/");}catch(e){}
+ if(fr){try{if(!localStorage.getItem(RETURN_KEY))localStorage.setItem(RETURN_KEY,fr);}catch(e){}}
+ let rm=null;try{rm=validReturnUrl(localStorage.getItem(RETURN_KEY));}catch(e){}return rm||fr||validReturnUrl(SHOP_URL);}
+const RETURN_URL=resolveReturnUrl();
+const $=id=>document.getElementById(id);
+function cleanName(s){ return String(s||"").replace(/[^\p{L}\p{M}' \-.]/gu,"").replace(/\s+/g," ").trim().slice(0,20); }
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+// optional ?name= on the Canva link (advanced option only)
+const pn=cleanName(readParam("name")); if(pn){ store.set(NAME_KEY,pn); store.set(ASKED_KEY,"1"); }
+let childName=cleanName(store.get(NAME_KEY));
+function applyName(){
+  $("dear").textContent= childName ? "Dear "+childName+"," : "Dear Sweet Friend,";
+  $("toTag").textContent= childName ? "To: "+childName : "";
+  $("toTag").style.display= childName ? "" : "none";
+}
+applyName();
+function openEnvelope(){
+  const st=$("stage"); if(st.classList.contains("opened")) return;
+  $("env").classList.remove("idle"); st.classList.add("opening");
+  setTimeout(()=>{ st.classList.add("opened"); },450);
+  setTimeout(()=>{ $("inv").classList.add("on"); $("inv").scrollTop=0; $("backBtn2").focus({preventScroll:true}); },1700);
+}
+$("env").onclick=openEnvelope;
+$("again").onclick=()=>{ $("inv").classList.remove("on"); const st=$("stage"); st.classList.remove("opened","opening"); $("env").classList.add("idle"); };
+function showNameSheet(){ $("nameIn").value=childName; $("nameSheet").classList.add("on"); setTimeout(()=>$("nameIn").focus(),50); }
+$("saveName").onclick=()=>{ childName=cleanName($("nameIn").value); store.set(NAME_KEY,childName); store.set(ASKED_KEY,"1"); applyName(); $("nameSheet").classList.remove("on"); };
+$("skip").onclick=()=>{ store.set(ASKED_KEY,"1"); $("nameSheet").classList.remove("on"); };
+$("nameIn").addEventListener("keydown",e=>{ if(e.key==="Enter") $("saveName").click(); });
+$("editName").onclick=showNameSheet;
+function goBack(){ if(RETURN_URL){ location.assign(RETURN_URL); return; } if(window.opener){try{window.close();}catch(e){}} $("backModal").classList.add("on"); }
+$("backBtn").onclick=goBack; $("backBtn2").onclick=goBack; $("backOk").onclick=()=>$("backModal").classList.remove("on");
+// sparkles
+[[18,40],[82,44],[30,62],[72,66],[50,58],[12,78],[88,80]].forEach(([x,y],i)=>{ const s=document.createElement("span"); s.className="spark"; s.style.left=x+"%"; s.style.top=y+"%"; s.style.animationDelay=(i*.27)+"s"; $("stage").appendChild(s); });
+// first visit: ask a grown-up for the name once
+if(!store.get(ASKED_KEY) && !childName) showNameSheet();
+window.__ready=true;
+</script>
+</body>
+</html>
