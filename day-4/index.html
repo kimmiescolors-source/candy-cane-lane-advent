@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Day 4 · Magical Hot Cocoa Station · Candy Cane Lane</title>
+<style>
+:root{
+  --cran:#8C1530; --red:#D6243A; --mint:#5FD6B3; --mintsoft:#DDF6EC; --mintdeep:#2E9C7E;
+  --pink:#F7A8C4; --pinksoft:#FDE3EC; --ivory:#FFF8EC; --gold:#D9A94A; --ink:#4A2230;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--ivory);color:var(--ink);font-family:Georgia,"Times New Roman",serif;-webkit-text-size-adjust:100%}
+body{min-height:100vh;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(247,168,196,.25) 0 8px, transparent 9px) 0 0/46px 46px,
+    linear-gradient(var(--ivory),var(--ivory));}
+button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.stripe{height:14px;background:repeating-linear-gradient(-45deg,var(--red) 0 14px,#fff 14px 28px);box-shadow:0 2px 0 var(--pink)}
+header{display:flex;align-items:center;gap:12px;padding:10px 16px;max-width:1240px;margin:0 auto}
+header h1{flex:1;margin:0;text-align:center;font-weight:normal;font-style:italic;color:var(--cran);font-size:clamp(20px,3.2vw,32px);line-height:1.15}
+header h1 small{display:block;font-style:normal;font-size:.48em;letter-spacing:.18em;text-transform:uppercase;color:var(--mintdeep);margin-bottom:2px}
+.back{display:inline-flex;min-width:44px;justify-content:center;align-items:center;gap:6px;border:2px solid var(--cran);background:#fff;color:var(--cran);border-radius:999px;padding:9px 14px;font-size:15px;min-height:44px;white-space:nowrap}
+.back:hover{background:var(--pinksoft)}
+.spacer{width:120px}
+main{max-width:1240px;margin:0 auto;padding:6px 16px 28px;display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:22px;align-items:start}
+.stage{position:relative;border-radius:22px;overflow:hidden;box-shadow:0 0 0 4px #fff,0 0 0 7px var(--pink),0 14px 30px rgba(140,21,48,.18);background:var(--mintsoft);aspect-ratio:4/5;max-height:calc(100vh - 120px);margin:0 auto;width:100%}
+.stage canvas{display:block;width:100%;height:100%}
+#loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:var(--cran);font-size:18px;background:var(--mintsoft)}
+.panel{background:#fff;border-radius:22px;padding:18px 18px 20px;box-shadow:0 0 0 3px var(--mintsoft),0 10px 24px rgba(46,156,126,.15)}
+.panel h2{margin:0 0 10px;font-weight:normal;font-size:19px;color:var(--cran);display:flex;align-items:center;gap:10px}
+.panel h2 .n{display:inline-flex;width:30px;height:30px;border-radius:50%;background:var(--cran);color:#fff;align-items:center;justify-content:center;font-size:16px;flex:none}
+.section{margin-bottom:18px}
+.mugs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mugs button{border:3px solid transparent;background:var(--ivory);border-radius:16px;padding:6px 4px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--ink);min-height:44px;transition:transform .12s}
+.mugs button img{width:100%;max-width:78px;aspect-ratio:1/1;object-fit:contain}
+.mugs button[aria-pressed="true"]{border-color:var(--cran);background:var(--pinksoft)}
+.mugs button:active,.tops button:active{transform:scale(.96)}
+.tops{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.tops button{display:flex;align-items:center;gap:8px;border:2px solid var(--mintsoft);background:#fff;border-radius:14px;padding:6px 10px 6px 6px;font-size:15px;color:var(--ink);text-align:left;min-height:56px;position:relative}
+.tops button canvas{width:42px;height:42px;flex:none;border-radius:10px;background:var(--mintsoft)}
+.tops button .chk{margin-left:auto;width:24px;height:24px;border-radius:50%;border:2px solid var(--mint);flex:none;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff}
+.tops button[aria-pressed="true"]{border-color:var(--mint);background:var(--mintsoft)}
+.tops button[aria-pressed="true"] .chk{background:var(--mintdeep);border-color:var(--mintdeep)}
+.tops button[aria-pressed="true"] .chk::after{content:"✓"}
+.namebox{display:flex;gap:8px}
+.namebox input{flex:1;min-width:0;font-family:inherit;font-size:18px;font-style:italic;color:var(--cran);border:2px solid var(--pink);border-radius:14px;padding:10px 12px;background:var(--ivory)}
+.namebox input:focus{outline:3px solid var(--pinksoft);border-color:var(--cran)}
+.dice{border:2px solid var(--pink);background:#fff;border-radius:14px;min-width:52px;font-size:22px}
+.hint{font-size:13px;color:#8a6a72;margin:6px 2px 0}
+.make{width:100%;border:none;border-radius:999px;padding:16px 20px;font-size:21px;color:#fff;background:linear-gradient(var(--red),var(--cran));box-shadow:0 5px 0 #5e0d20,0 10px 18px rgba(140,21,48,.3);min-height:56px;letter-spacing:.02em}
+.make:active{transform:translateY(3px);box-shadow:0 2px 0 #5e0d20}
+.selected{font-size:14px;color:#6b4a54;margin:10px 2px 0;text-align:center;min-height:1.2em}
+/* recipe view */
+.overlay{position:fixed;inset:0;background:rgba(74,34,48,.55);display:none;align-items:flex-start;justify-content:center;z-index:50;overflow:auto;padding:16px 12px 40px;-webkit-overflow-scrolling:touch}
+.overlay.on{display:flex}
+.sheet{background:var(--ivory);border-radius:22px;max-width:760px;width:100%;padding:16px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.sheet img{display:block;width:100%;height:auto;border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.actions button{min-height:52px;border-radius:999px;border:2px solid var(--cran);background:#fff;color:var(--cran);font-size:17px}
+.actions button.primary{background:var(--cran);color:#fff}
+.note{font-size:13px;color:#7a5a62;text-align:center;margin:10px 4px 0}
+.modal{position:fixed;inset:0;background:rgba(74,34,48,.5);display:none;align-items:center;justify-content:center;z-index:80;padding:20px}
+.modal.on{display:flex}
+.modal .card{background:#fff;border-radius:20px;padding:22px;max-width:380px;text-align:center;box-shadow:0 0 0 4px var(--pink)}
+.modal h2{margin:0 0 8px;color:var(--cran);font-weight:normal;font-style:italic}
+.modal button{min-height:48px;border-radius:999px;border:none;background:var(--cran);color:#fff;font-size:17px;padding:0 30px;margin-top:8px}
+#printImg{display:none}
+@media (max-width:900px){
+  main{grid-template-columns:1fr;gap:16px}
+  .stage{max-height:none;max-width:560px}
+  .panel{max-width:560px;margin:0 auto;width:100%}
+  .spacer{display:none}
+  header{padding:8px 12px}
+}
+@media (max-width:480px){
+  .back span{display:none}
+  .back{padding:9px 12px}
+  .mugs button{font-size:11px}
+  .tops button{font-size:14px}
+}
+@media print{
+  @page{margin:0.4in}
+  html,body{background:#fff !important}
+  body > *{display:none !important}
+  #printImg{display:block !important;width:100%;height:auto;max-height:10in;object-fit:contain;margin:0 auto}
+}
+</style>
+</head>
+<body>
+<div class="stripe"></div>
+<header>
+  <button class="back" id="backBtn" aria-label="Back to the Sweet Shop">&#8592; <span>Back to the Sweet Shop</span></button>
+  <h1><small>Day 4 &middot; Candy Cane Lane</small>The Magical Hot Cocoa Station</h1>
+  <div class="spacer"></div>
+</header>
+<main>
+  <div class="stage">
+    <canvas id="scene" width="952" height="1190" aria-label="Your hot cocoa on the Candy Cane Lane counter" role="img"></canvas>
+    <div id="loading">Warming up the cocoa&hellip;</div>
+  </div>
+  <div class="panel">
+    <div class="section">
+      <h2><span class="n">1</span>Pick your mug</h2>
+      <div class="mugs" id="mugs"></div>
+    </div>
+    <div class="section">
+      <h2><span class="n">2</span>Add your toppings</h2>
+      <div class="tops" id="tops"></div>
+    </div>
+    <div class="section">
+      <h2><span class="n">3</span>Name your cocoa</h2>
+      <div class="namebox">
+        <input id="name" maxlength="40" autocomplete="off" aria-label="Name for your hot cocoa">
+        <button class="dice" id="dice" aria-label="Make up a new name" title="New name">&#127922;</button>
+      </div>
+      <p class="hint">Tap the dice for a new name, or type your own.</p>
+    </div>
+    <button class="make" id="make">Make My Recipe &#9749;</button>
+    <p class="selected" id="summary"></p>
+  </div>
+</main>
+
+<div class="overlay" id="recipe" role="dialog" aria-modal="true" aria-label="Your recipe card">
+  <div class="sheet">
+    <img id="cardImg" alt="Your printable hot cocoa recipe card">
+    <div class="actions">
+      <button class="primary" id="printBtn">&#128424; Print</button>
+      <button class="primary" id="pdfBtn">&#11015; Save as PDF</button>
+      <button id="pngBtn">Save picture</button>
+      <button id="closeRecipe">&#8592; Keep making cocoa</button>
+    </div>
+    <p class="note">Tip: in the print window you can also choose &ldquo;Save as PDF&rdquo;.</p>
+  </div>
+</div>
+
+<div class="modal" id="backModal" role="dialog" aria-modal="true">
+  <div class="card">
+    <h2>Back to the Sweet Shop</h2>
+    <p>Your cocoa is saved. Your Sweet Shop is still open in your other tab. Close this tab to go back to it.</p>
+    <button id="backOk">OK</button>
+  </div>
+</div>
+<img id="printImg" alt="">
+
+<script>
+window.addEventListener("error", function(e){
+  var l=document.getElementById("loading");
+  if(l && !window.__ready) l.textContent="Sorry, the cocoa station couldn't open. ("+(e.message||"unknown error")+")";
+});
+setTimeout(function(){
+  var l=document.getElementById("loading");
+  if(l && !window.__ready) l.textContent="Still warming up… (if this doesn't change, please refresh the page)";
+}, 15000);
+</script>
+<script>
+/* ===== Settings ===== */
+const SHOP_URL = "";
+const ALLOWED_RETURN_HOSTS = ["canva.site", "canva.com", "canva.link"];
+const STORE_KEY = "candycanelane-day4-cocoa-v1";
+const RETURN_KEY = "candycanelane-return-url";
+
+/* ===== Safe return link (same rules as Day 8) ===== */
+function validReturnUrl(raw){
+  try{
+    if(!raw || raw.length>500) return null;
+    const u = new URL(raw);
+    if(u.protocol!=="https:" || u.username || u.password) return null;
+    const h = u.hostname.toLowerCase();
+    if(!ALLOWED_RETURN_HOSTS.some(a => h===a || h.endsWith("."+a))) return null;
+    return u.href;
+  }catch(e){ return null; }
+}
+function readParam(name){
+  try{
+    const q = new URLSearchParams(location.search).get(name);
+    if(q) return q;
+    return new URLSearchParams(location.hash.replace(/^#/,"")).get(name);
+  }catch(e){ return null; }
+}
+function resolveReturnUrl(){
+  const fromLink = validReturnUrl(readParam("return"));
+  if(fromLink){ try{ localStorage.setItem(RETURN_KEY, fromLink); }catch(e){} return fromLink; }
+  let fromRef = null;
+  try{ if(document.referrer) fromRef = validReturnUrl(new URL(document.referrer).origin + "/"); }catch(e){}
+  if(fromRef){ try{ if(!localStorage.getItem(RETURN_KEY)) localStorage.setItem(RETURN_KEY, fromRef); }catch(e){} }
+  let remembered = null;
+  try{ remembered = validReturnUrl(localStorage.getItem(RETURN_KEY)); }catch(e){}
+  return remembered || fromRef || validReturnUrl(SHOP_URL);
+}
+const RETURN_URL = resolveReturnUrl();
+
+/* ===== Data ===== */
+const META = {"mug_ivory":{"w":914,"h":797,"cx":0.3971553610503282,"cy":0.19071518193224593,"rx":0.33260393873085337,"ry":0.09535759096612297},"mug_cane":{"w":916,"h":801,"cx":0.39792576419213976,"cy":0.19288389513108614,"rx":0.33133187772925765,"ry":0.09425717852684144},"mug_mint":{"w":915,"h":800,"cx":0.39672131147540984,"cy":0.191875,"rx":0.33224043715846996,"ry":0.095625},"mug_pink":{"w":915,"h":800,"cx":0.39726775956284155,"cy":0.191875,"rx":0.33169398907103825,"ry":0.095625},"cream":{"w":640,"h":612},"bg":{"w":952,"h":1190},"atlas":{"stick":[[0,0,238,145],[240,0,244,143]],"choc":[[486,0,104,122],[688,0,110,113],[800,0,109,111],[0,147,114,109],[304,147,115,105],[421,147,121,105],[761,147,110,101],[656,258,128,90]],"mint":[[592,0,94,114],[116,147,76,106],[194,147,108,105],[544,147,105,104],[651,147,108,103],[580,258,74,93],[786,258,85,89],[0,359,81,71]],"marsh":[[873,147,93,99],[0,258,93,99],[95,258,93,99],[190,258,93,99],[285,258,90,97],[377,258,100,95],[479,258,99,94],[873,258,99,88]],"dust":[[83,359,73,64],[158,359,67,63],[227,359,71,63],[300,359,63,62],[365,359,63,62],[694,359,65,54]],"spr":[[430,359,36,59],[468,359,37,59],[507,359,42,57],[551,359,46,57],[599,359,46,55],[647,359,45,55],[761,359,49,54],[812,359,50,53],[864,359,51,53],[917,359,51,52],[970,359,51,52],[0,432,52,51],[54,432,51,51],[107,432,53,50],[162,432,53,49],[217,432,54,48],[273,432,54,48],[329,432,53,47],[384,432,55,47],[441,432,56,45],[499,432,56,44],[557,432,58,37],[617,432,58,36]]}};
+const MUGS = [
+  {id:"mug_ivory", name:"Snowy Ivory",        short:"Ivory",     word:"Snowy"},
+  {id:"mug_cane",  name:"Candy Cane Stripe",  short:"Candy Cane",word:"Candy Cane"},
+  {id:"mug_mint",  name:"Peppermint Hearts",  short:"Mint Hearts",word:"Peppermint"},
+  {id:"mug_pink",  name:"Pink Snowflake",     short:"Snowflake", word:"Sugarplum"}
+];
+// Topping amounts are defined here and used on the card. Order = layering order.
+const TOPS = [
+  {id:"cream",  name:"Whipped cream",      amount:"2 tbsp (30 mL) whipped cream",                        word:"Cloud"},
+  {id:"marsh",  name:"Mini marshmallows",  amount:"2 tbsp (30 mL) mini marshmallows",                    word:"Marshmallow"},
+  {id:"choc",   name:"Chocolate shavings", amount:"1 tsp (5 mL) chocolate shavings",                     word:"Fudge"},
+  {id:"mint",   name:"Crushed peppermint", amount:"1 tsp (5 mL) crushed peppermint (crushed candy cane)", word:"Peppermint Crunch"},
+  {id:"cinn",   name:"Cinnamon",           amount:"1 pinch (about 1/8 tsp / 0.5 mL) ground cinnamon",    word:"Cinnamon Spice"},
+  {id:"spr",    name:"Festive sprinkles",  amount:"1/2 tsp (2 mL) festive sprinkles",                    word:"Sprinkle Party"}
+];
+const BASE = [
+  "1 cup (250 mL) milk",
+  "1 tbsp (15 mL) unsweetened cocoa powder",
+  "1 tbsp (15 mL) sugar",
+  "1 tbsp (15 mL) chocolate chips",
+  "1/4 tsp (1 mL) vanilla extract (optional)"
+];
+const ADJ = ["Magical","Merry","Twinkly","Jolly","Sparkly","Cozy","Snowy","Dreamy","Sweet","Frosty"];
+const NOUN = ["Cocoa","Dream","Delight","Wonder","Swirl","Cup of Cheer","Hug in a Mug","Surprise"];
+
+/* ===== State ===== */
+let state = {mug:"mug_cane", tops:["cream","marsh"], name:"", custom:false};
+try{ const s = JSON.parse(localStorage.getItem(STORE_KEY)||"null");
+  if(s && MUGS.some(m=>m.id===s.mug)){ state.mug=s.mug; state.tops=(s.tops||[]).filter(t=>TOPS.some(x=>x.id===t)); state.name=String(s.name||"").slice(0,40); state.custom=!!s.custom; }
+}catch(e){}
+function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
+const $ = id => document.getElementById(id);
+
+/* ===== Images ===== */
+const IMG = {};
+function loadImg(key, src){ return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>{IMG[key]=i;res();}; i.onerror=()=>rej(new Error("could not load "+src)); i.src=src; }); }
+
+/* ===== Seeded random ===== */
+function rng(seed){ let s=seed>>>0; return ()=>{ s=(s+0x6D2B79F5)>>>0; let t=s; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
+
+/* ===== Placement (fixed per topping so nothing jumps around) ===== */
+let creamPts = [];
+function prepCream(){
+  const c=IMG.cream, w=160, h=Math.round(160*c.height/c.width);
+  const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+  const x=cv.getContext("2d"); x.drawImage(c,0,0,w,h);
+  const d=x.getImageData(0,0,w,h).data, A=(i,j)=> (i<0||j<0||i>=w||j>=h)?0:d[(j*w+i)*4+3];
+  const r=9;
+  for(let j=0;j<h*0.86;j+=2) for(let i=0;i<w;i+=2){
+    if(A(i,j)>240 && A(i-r,j)>200 && A(i+r,j)>200 && A(i,j-r)>200 && A(i,j+r)>200) creamPts.push([i/w,j/h]);
+  }
+}
+const LAYOUT = {};
+function makeLayout(){
+  const spec = {marsh:{n:6,size:.11,min:.12}, choc:{n:7,size:.075,min:.085}, mint:{n:7,size:.07,min:.08}, spr:{n:18,size:.04,min:.05}, cinn:{n:6,size:.05,min:.06}};
+  for(const id in spec){
+    const sp=spec[id];
+    for(const surf of ["cocoa","cream"]){
+      const R=rng(id.length*977 + (surf==="cream"?31:7) + id.charCodeAt(0)*13);
+      const pts=[]; let tries=0;
+      while(pts.length<sp.n && tries<4000){
+        tries++;
+        let p;
+        if(surf==="cocoa"){ const i=pts.length, ph=id.charCodeAt(0)*.7, a=i*2.39996+ph+(R()-.5)*.3, rr=Math.sqrt((i+.5)/sp.n)*.8; p=[Math.cos(a)*rr*1.05, Math.sin(a)*rr*.7+.12]; }
+        else { const q=creamPts[Math.floor(R()*creamPts.length)]; p=[q[0],q[1]]; }
+        const minD = surf==="cocoa" ? 0 : sp.min*1.15;
+        if(pts.every(o=>Math.hypot(o.x-p[0],o.y-p[1])>minD*(tries>2000?.6:1))) pts.push({x:p[0],y:p[1],rot:(R()-.5)*1.4,k:Math.floor(R()*1000),s:.85+R()*.3});
+      }
+      pts.sort((a,b)=>a.y-b.y);
+      LAYOUT[id+"_"+surf]=pts;
+    }
+  }
+}
+
+/* ===== Drawing ===== */
+function sprite(ctx, cat, k, cx, cy, w, rot, alpha){
+  const list=META.atlas[cat]; const r=list[k%list.length]; const h=w*r[3]/r[2];
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot); if(alpha!=null) ctx.globalAlpha*=alpha;
+  ctx.drawImage(IMG.atlas, r[0],r[1],r[2],r[3], -w/2,-h/2, w,h); ctx.restore();
+}
+// Draw a mug with toppings. (mx,my) = top-left of mug image, mw = mug width.
+function drawMug(ctx, mugId, tops, mx, my, mw, anim){
+  const M=META[mugId], mh=mw*M.h/M.w;
+  const ex=mx+M.cx*mw, ey=my+M.cy*mh, erx=M.rx*mw, ery=M.ry*mh;
+  const has=t=>tops.includes(t);
+  const drop=t=> (anim && anim.id===t) ? anim.p : 1;   // 0..1 animation progress
+  const fall=t=> (1-drop(t))*-mw*.35;
+  // soft shadow on counter
+  ctx.save(); ctx.fillStyle="rgba(90,40,50,.16)"; ctx.beginPath(); ctx.ellipse(mx+mw*.42, my+mh*.985, mw*.36, mh*.035, 0,0,Math.PI*2); ctx.fill(); ctx.restore();
+  ctx.drawImage(IMG[mugId], mx, my, mw, mh);
+  // cinnamon stick standing in the cocoa (hidden below the front rim)
+  if(has("cinn")){
+    ctx.save(); ctx.globalAlpha=Math.min(1,drop("cinn")*1.5);
+    ctx.beginPath(); ctx.rect(mx-mw, my-mh*2, mw*3, (ey-(my-mh*2))); ctx.ellipse(ex,ey,erx*.97,ery*.94,0,0,Math.PI); ctx.clip();
+    const r=META.atlas.stick[0], sw=mw*.6, sh=sw*r[3]/r[2];
+    ctx.translate(ex+erx*.38, ey+ery*.35+fall("cinn")); ctx.rotate(-1.05);
+    ctx.drawImage(IMG.atlas, r[0],r[1],r[2],r[3], -sw*.12, -sh/2, sw, sh);
+    ctx.restore();
+  }
+  // cream
+  let cb=null;
+  if(has("cream")){
+    const p=drop("cream"), cw=erx*2*1.06*(.6+.4*p), ch=cw*IMG.cream.height/IMG.cream.width;
+    cb={x:ex-cw/2, y:ey+ery*.62-ch, w:cw, h:ch};
+    ctx.save(); ctx.globalAlpha=Math.min(1,p*1.4); ctx.drawImage(IMG.cream, cb.x, cb.y, cb.w, cb.h); ctx.restore();
+  }
+  const place=(id,cat,scale)=>{
+    if(!has(id)) return;
+    const pts=LAYOUT[id+"_"+(cb?"cream":"cocoa")], p=drop(id);
+    pts.forEach((q,i)=>{
+      const x = cb ? cb.x+q.x*cb.w : ex+q.x*erx;
+      const y = cb ? cb.y+q.y*cb.h : ey+q.y*ery;
+      const delay=i/pts.length*.5, pp=Math.max(0,Math.min(1,(p-delay)/.5));
+      if(pp<=0) return;
+      const yy=y-(1-pp)*(1-pp)*mw*.5;
+      sprite(ctx, cat, q.k, x, yy, mw*scale*q.s, q.rot, Math.min(1,pp*2));
+    });
+  };
+  place("cinn","dust",.05);
+  place("marsh","marsh",.11);
+  place("choc","choc",.075);
+  place("mint","mint",.07);
+  place("spr","spr",.04);
+}
+const scene=$("scene"), sctx=scene.getContext("2d");
+let anim=null;
+function render(){
+  sctx.clearRect(0,0,scene.width,scene.height);
+  sctx.drawImage(IMG.bg,0,0,scene.width,scene.height);
+  const mw=scene.width*.6, M=META[state.mug], mh=mw*M.h/M.w;
+  drawMug(sctx, state.mug, state.tops, (scene.width-mw)/2+mw*.06, scene.height*.795-mh, mw, anim);
+}
+function animate(id){
+  const t0=performance.now(), dur=650, a={id,p:0};
+  anim=a;
+  const step=t=>{ if(anim!==a) return; let q=Math.min(1,(t-t0)/dur); a.p=1-Math.pow(1-q,3); render(); if(q<1) requestAnimationFrame(step); else { anim=null; render(); } };
+  requestAnimationFrame(step);
+}
+
+/* ===== Names ===== */
+function newName(){
+  const R=Math.random, mug=MUGS.find(m=>m.id===state.mug);
+  const tw=state.tops.map(t=>TOPS.find(x=>x.id===t).word);
+  const pick=a=>a[Math.floor(R()*a.length)];
+  const forms=[
+    ()=>pick(ADJ)+" "+(tw.length?pick(tw):mug.word)+" "+pick(NOUN),
+    ()=>mug.word+" "+(tw.length?pick(tw):pick(ADJ))+" "+pick(NOUN),
+    ()=>"The "+pick(ADJ)+" "+(tw.length?pick(tw):mug.word)+" "+pick(NOUN)
+  ];
+  let n=""; for(let i=0;i<6;i++){ n=pick(forms)(); if(n.length<=40 && n!==state.name) break; }
+  state.name=n.slice(0,40); state.custom=false; $("name").value=state.name; save();
+}
+
+/* ===== UI ===== */
+function buildUI(){
+  const mugsEl=$("mugs");
+  MUGS.forEach(m=>{
+    const b=document.createElement("button"); b.type="button"; b.dataset.id=m.id;
+    b.setAttribute("aria-label", m.name+" mug");
+    const i=document.createElement("img"); i.src=IMG[m.id].src; i.alt=""; b.appendChild(i);
+    const s=document.createElement("span"); s.textContent=m.short; b.appendChild(s);
+    b.onclick=()=>{ state.mug=m.id; if(!state.custom) newName(); save(); sync(); render(); };
+    mugsEl.appendChild(b);
+  });
+  const topsEl=$("tops");
+  TOPS.forEach(t=>{
+    const b=document.createElement("button"); b.type="button"; b.dataset.id=t.id;
+    const c=document.createElement("canvas"); c.width=84; c.height=84; const x=c.getContext("2d");
+    if(t.id==="cream"){ const ih=74*IMG.cream.height/IMG.cream.width; x.drawImage(IMG.cream,5,(84-ih)/2,74,ih); }
+    else if(t.id==="cinn"){ const r=META.atlas.stick[0], w=78, h=w*r[3]/r[2]; x.save(); x.translate(42,42); x.rotate(-.6); x.drawImage(IMG.atlas,r[0],r[1],r[2],r[3],-w/2,-h/2,w,h); x.restore(); }
+    else { const cat={marsh:"marsh",choc:"choc",mint:"mint",spr:"spr"}[t.id], n=t.id==="spr"?7:3;
+      const R=rng(t.id.charCodeAt(0)*91);
+      for(let k=0;k<n;k++){ const r=META.atlas[cat][k%META.atlas[cat].length], w=t.id==="spr"?20:38, h=w*r[3]/r[2];
+        const px=n===3?[24,58,42][k]:14+R()*56, py=n===3?[30,34,58][k]:14+R()*56;
+        x.save(); x.translate(px,py); x.rotate((R()-.5)*1.2); x.drawImage(IMG.atlas,r[0],r[1],r[2],r[3],-w/2,-h/2,w,h); x.restore(); } }
+    b.appendChild(c);
+    const s=document.createElement("span"); s.textContent=t.name; b.appendChild(s);
+    const k=document.createElement("span"); k.className="chk"; b.appendChild(k);
+    b.onclick=()=>{
+      const on=state.tops.includes(t.id);
+      state.tops = on ? state.tops.filter(x=>x!==t.id) : TOPS.map(x=>x.id).filter(id=>id===t.id||state.tops.includes(id));
+      if(!state.custom) newName();
+      save(); sync(); if(on) render(); else animate(t.id);
+    };
+    topsEl.appendChild(b);
+  });
+  $("name").addEventListener("input",e=>{ state.name=e.target.value.slice(0,40); state.custom=state.name.trim().length>0; save(); });
+  $("dice").onclick=newName;
+  $("make").onclick=showRecipe;
+  $("closeRecipe").onclick=()=>{ $("recipe").classList.remove("on"); };
+  $("printBtn").onclick=()=>{ window.print(); };
+  $("pdfBtn").onclick=downloadPDF;
+  $("pngBtn").onclick=downloadPNG;
+  $("backBtn").onclick=goBack;
+  $("backOk").onclick=()=>$("backModal").classList.remove("on");
+}
+function sync(){
+  document.querySelectorAll("#mugs button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.id===state.mug));
+  document.querySelectorAll("#tops button").forEach(b=>{ const on=state.tops.includes(b.dataset.id); b.setAttribute("aria-pressed", on); b.setAttribute("aria-label", TOPS.find(t=>t.id===b.dataset.id).name+(on?" (added)":"")); });
+  const mug=MUGS.find(m=>m.id===state.mug);
+  $("summary").textContent = mug.name+" mug" + (state.tops.length ? " · "+state.tops.length+" topping"+(state.tops.length>1?"s":"") : " · no toppings yet");
+}
+function goBack(){
+  save();
+  if(RETURN_URL){ window.location.assign(RETURN_URL); return; }
+  if(window.opener){ try{ window.close(); }catch(e){} }
+  $("backModal").classList.add("on");
+}
+
+/* ===== Recipe card ===== */
+const CW=1275, CH=1650;
+function wrap(ctx, text, maxW){
+  const words=text.split(" "), lines=[]; let line="";
+  for(const w of words){ const t=line?line+" "+w:w; if(ctx.measureText(t).width>maxW && line){ lines.push(line); line=w; } else line=t; }
+  if(line) lines.push(line); return lines;
+}
+function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function cardName(){ return (state.name||"").trim() || "My Magical Hot Cocoa"; }
+function steps(){
+  const sel=TOPS.filter(t=>state.tops.includes(t.id)).map(t=>t.name.toLowerCase());
+  const list = sel.length>1 ? sel.slice(0,-1).join(", ")+" and "+sel[sel.length-1] : sel[0];
+  return [
+    "Grown-up step: warm the milk in a small saucepan over medium-low heat until it is hot and steaming, but not boiling.",
+    "Grown-up step: whisk in the cocoa powder, sugar and chocolate chips until everything is melted and smooth.",
+    "Grown-up step: take the pan off the heat.",
+    "Stir in the vanilla extract, if you like.",
+    "Grown-up step: carefully pour the hot cocoa into your mug.",
+    sel.length ? "Add your toppings: "+list+". Let it cool to a safe sipping temperature, then enjoy!" : "Enjoy it plain and simple! Let it cool to a safe sipping temperature before sipping."
+  ];
+}
+function drawCard(){
+  const c=document.createElement("canvas"); c.width=CW; c.height=CH; const x=c.getContext("2d");
+  // candy cane frame
+  x.fillStyle="#fff"; x.fillRect(0,0,CW,CH);
+  x.save(); x.beginPath(); x.rect(0,0,CW,CH); x.rect(34,34,CW-68,CH-68); x.clip("evenodd");
+  x.fillStyle="#D6243A"; for(let i=-CH;i<CW+CH;i+=56){ x.beginPath(); x.moveTo(i,0); x.lineTo(i+28,0); x.lineTo(i+28-CH,CH); x.lineTo(i-CH,CH); x.closePath(); x.fill(); }
+  x.restore();
+  x.fillStyle="#FFF8EC"; x.fillRect(34,34,CW-68,CH-68);
+  x.strokeStyle="#F7A8C4"; x.lineWidth=6; x.strokeRect(37,37,CW-74,CH-74);
+  x.strokeStyle="#D9A94A"; x.lineWidth=2; x.strokeRect(54,54,CW-108,CH-108);
+  // scallops under the top
+  x.fillStyle="#F7A8C4"; for(let i=0;i<24;i++){ const cx=60+i*(CW-120)/23; x.beginPath(); x.arc(cx,58,22,0,Math.PI); x.fill(); }
+  x.textAlign="center"; x.fillStyle="#2E9C7E";
+  x.font="bold 26px Georgia, serif"; x.fillText("C A N D Y   C A N E   L A N E   ·   D A Y   4", CW/2, 140);
+  x.fillStyle="#8C1530";
+  let fs=74; x.font="italic "+fs+"px Georgia, serif";
+  while(x.measureText(cardName()).width>CW-200 && fs>40){ fs-=2; x.font="italic "+fs+"px Georgia, serif"; }
+  const nameLines = wrap(x, cardName(), CW-200).slice(0,2);
+  let ty=225; nameLines.forEach(l=>{ x.fillText(l, CW/2, ty); ty+=fs*1.1; });
+  x.fillStyle="#6b4a54"; x.font="26px Georgia, serif"; x.fillText("A magical hot cocoa recipe  ·  Makes 1 mug", CW/2, ty+2);
+  const top=ty+40;
+  // gold divider
+  x.strokeStyle="#D9A94A"; x.lineWidth=2; x.beginPath(); x.moveTo(200,top-12); x.lineTo(CW-200,top-12); x.stroke();
+  // mug on pink circle (left)
+  const mcx=330, mcy=top+250;
+  x.fillStyle="#FDE3EC"; x.beginPath(); x.arc(mcx,mcy,225,0,Math.PI*2); x.fill();
+  x.strokeStyle="#F7A8C4"; x.lineWidth=5; x.setLineDash([2,14]); x.lineCap="round"; x.beginPath(); x.arc(mcx,mcy,240,0,Math.PI*2); x.stroke(); x.setLineDash([]);
+  const M=META[state.mug], mw=330, mh=mw*M.h/M.w;
+  drawMug(x, state.mug, state.tops, mcx-mw*.44, mcy+mh*.62-mh+30, mw, null);
+  const mug=MUGS.find(m=>m.id===state.mug);
+  x.fillStyle="#8C1530"; x.font="italic 26px Georgia, serif"; x.fillText(mug.name+" mug", mcx, mcy+275);
+  // ingredients (right)
+  x.textAlign="left";
+  let ix=620, iy=top+30;
+  const head=(t,y)=>{ x.fillStyle="#8C1530"; x.font="bold 34px Georgia, serif"; x.fillText(t, ix, y); };
+  head("Ingredients", iy); iy+=48;
+  x.font="25px Georgia, serif"; x.fillStyle="#4A2230";
+  const bullet=(t,color)=>{ wrap(x,t,520).forEach((l,i)=>{ if(i===0){ x.fillStyle=color; x.beginPath(); x.arc(ix+8,iy-8,6,0,Math.PI*2); x.fill(); } x.fillStyle="#4A2230"; x.fillText(l, ix+26, iy); iy+=34; }); iy+=4; };
+  BASE.forEach(t=>bullet(t,"#5FD6B3"));
+  iy+=14; head("Your toppings", iy); iy+=46; x.font="25px Georgia, serif";
+  const sel=TOPS.filter(t=>state.tops.includes(t.id));
+  if(sel.length) sel.forEach(t=>bullet(t.amount,"#F7A8C4"));
+  else { x.fillStyle="#6b4a54"; x.font="italic 25px Georgia, serif"; x.fillText("No toppings — classic cocoa!", ix+26, iy); iy+=38; }
+  // instructions
+  let y=Math.max(iy+30, top+560);
+  x.strokeStyle="#D9A94A"; x.lineWidth=2; x.beginPath(); x.moveTo(110,y-34); x.lineTo(CW-110,y-34); x.stroke();
+  x.fillStyle="#8C1530"; x.font="bold 34px Georgia, serif"; x.fillText("How to make it", 110, y+6); y+=54;
+  x.font="25px Georgia, serif";
+  steps().forEach((s,i)=>{
+    x.fillStyle="#8C1530"; x.beginPath(); x.arc(128,y-9,19,0,Math.PI*2); x.fill();
+    x.fillStyle="#fff"; x.font="bold 22px Georgia, serif"; x.textAlign="center"; x.fillText(String(i+1),128,y-1); x.textAlign="left";
+    x.fillStyle="#4A2230"; x.font="25px Georgia, serif";
+    wrap(x,s,CW-300).forEach(l=>{ x.fillText(l,166,y); y+=34; }); y+=10;
+  });
+  // safety box
+  y+=10; const bh=146;
+  x.fillStyle="#DDF6EC"; roundRect(x,100,y,CW-200,bh,24); x.fill();
+  x.strokeStyle="#5FD6B3"; x.lineWidth=3; x.stroke();
+  x.fillStyle="#2E7A64"; x.font="bold 27px Georgia, serif"; x.fillText("Grown-up helper needed!", 130, y+44);
+  x.font="23px Georgia, serif"; x.fillStyle="#3c4a46";
+  let sy=y+80;
+  wrap(x,"Hot milk and hot cocoa can burn. An adult should do all the stove-top steps and the pouring. Always let your cocoa cool before sipping, and check every label for allergies.",CW-270).forEach(l=>{ x.fillText(l,130,sy); sy+=31; });
+  // footer
+  x.textAlign="center"; x.fillStyle="#8C1530"; x.font="italic 24px Georgia, serif";
+  x.fillText("Made at the Candy Cane Lane Magical Hot Cocoa Station", CW/2, CH-82);
+  return c;
+}
+let cardCanvas=null;
+function showRecipe(){
+  save();
+  cardCanvas=drawCard();
+  const url=cardCanvas.toDataURL("image/png");
+  $("cardImg").src=url; $("printImg").src=url;
+  $("recipe").classList.add("on"); $("recipe").scrollTop=0;
+}
+function fileBase(){ return (cardName().replace(/[^A-Za-z0-9]+/g,"-").replace(/^-|-$/g,"")||"Hot-Cocoa")+"-Recipe"; }
+function saveBlob(blob, name){
+  const a=document.createElement("a"); const u=URL.createObjectURL(blob);
+  a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u), 60000);
+}
+function downloadPNG(){ if(!cardCanvas) cardCanvas=drawCard(); cardCanvas.toBlob(b=>saveBlob(b, fileBase()+".png"), "image/png"); }
+function downloadPDF(){
+  if(!cardCanvas) cardCanvas=drawCard();
+  const jpg=atob(cardCanvas.toDataURL("image/jpeg",0.92).split(",")[1]);
+  const img=new Uint8Array(jpg.length); for(let i=0;i<jpg.length;i++) img[i]=jpg.charCodeAt(i);
+  // US Letter page, 0.4in margins, image centred
+  const PW=612, PH=792, m=28.8, sc=Math.min((PW-2*m)/CW,(PH-2*m)/CH), w=CW*sc, h=CH*sc, ox=(PW-w)/2, oy=(PH-h)/2;
+  const content=`q ${w.toFixed(2)} 0 0 ${h.toFixed(2)} ${ox.toFixed(2)} ${oy.toFixed(2)} cm /Im0 Do Q`;
+  const enc=new TextEncoder(); const parts=[]; const offs=[]; let len=0;
+  const push=x=>{ const b=typeof x==="string"?enc.encode(x):x; parts.push(b); len+=b.length; };
+  push("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+  const obj=(n,body)=>{ offs[n]=len; push(n+" 0 obj\n"); body(); push("\nendobj\n"); };
+  obj(1,()=>push("<< /Type /Catalog /Pages 2 0 R >>"));
+  obj(2,()=>push("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"));
+  obj(3,()=>push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`));
+  obj(4,()=>{ push(`<< /Type /XObject /Subtype /Image /Width ${CW} /Height ${CH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${img.length} >>\nstream\n`); push(img); push("\nendstream"); });
+  obj(5,()=>push(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`));
+  obj(6,()=>push("<< /Title (Candy Cane Lane Hot Cocoa Recipe) /Producer (Candy Cane Lane) >>"));
+  const xref=len;
+  let t="xref\n0 7\n0000000000 65535 f \n"; for(let n=1;n<=6;n++) t+=String(offs[n]).padStart(10,"0")+" 00000 n \n";
+  push(t+"trailer\n<< /Size 7 /Root 1 0 R /Info 6 0 R >>\nstartxref\n"+xref+"\n%%EOF");
+  saveBlob(new Blob(parts,{type:"application/pdf"}), fileBase()+".pdf");
+}
+
+/* ===== Start ===== */
+Promise.all([
+  loadImg("bg","assets/counter.webp"), loadImg("cream","assets/cream.webp"), loadImg("atlas","assets/toppings.webp"),
+  ...MUGS.map(m=>loadImg(m.id,"assets/"+m.id+".webp"))
+]).then(()=>{
+  prepCream(); makeLayout(); buildUI();
+  if(!state.name) newName(); $("name").value=state.name;
+  sync(); render();
+  $("loading").style.display="none"; window.__ready=true;
+}).catch(e=>{ $("loading").textContent="Sorry, the cocoa station couldn't open. ("+e.message+")"; });
+</script>
+</body>
+</html>
