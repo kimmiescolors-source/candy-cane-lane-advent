@@ -1,9 +1,0 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Day 3 artwork helper</title>
-<style>body{font-family:Georgia,serif;padding:20px}button{font-size:18px;padding:12px 18px;margin:6px}img{max-width:200px;border:1px solid #ccc;display:block;margin:8px 0}</style></head>
-<body><p>Internal helper for building the Canva template (copies artwork to the clipboard).</p>
-<button id="l">Copy Letter artwork</button><button id="a">Copy A4 artwork</button><p id="s"></p>
-<img src="day3-ornament-letter.png"><img src="day3-ornament-a4.png">
-<script>
-async function cp(f){try{const b=await (await fetch(f,{cache:'no-store'})).blob();await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);document.getElementById('s').textContent='Copied '+f+' ('+b.size+' bytes)';}catch(e){document.getElementById('s').textContent='ERR '+e;}}
-document.getElementById('l').onclick=()=>cp('day3-ornament-letter.png');document.getElementById('a').onclick=()=>cp('day3-ornament-a4.png');
-</script></body></html>
