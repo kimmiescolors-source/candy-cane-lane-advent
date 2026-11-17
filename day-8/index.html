@@ -198,6 +198,17 @@
 <img id="printImg" alt="">
 
 <script>
+/* Show any start-up problem on screen instead of a stuck page */
+window.addEventListener("error", function(e){
+  var l=document.getElementById("loading");
+  if(l) l.textContent="Sorry, the colouring shop couldn't open. ("+(e.message||"unknown error")+")";
+});
+setTimeout(function(){
+  var l=document.getElementById("loading");
+  if(l && !window.__ready) l.textContent="Still opening… (if this doesn't change, please refresh the page)";
+}, 15000);
+</script>
+<script>
 /* ===== Settings ===== */
 // Optional fallback storefront address (leave empty for the template).
 const SHOP_URL = "";
@@ -499,6 +510,7 @@ linesImg.onload=()=>{
   if(restored){ $("hint").textContent="Welcome back! Your colouring was saved ✨"; setTimeout(hideHint,3500); }
   window.__ready=true;
 };
+linesImg.onerror=()=>{ const l=$("loading"); if(l) l.textContent="Sorry, the colouring picture couldn't load. Please refresh the page."; };
 linesImg.src=LINES_SRC;
 </script>
 </body>
