@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Day 9 · Peppermint Pairs · Candy Cane Lane</title>
+<style>
+:root{
+  --cran:#8C1530; --red:#D6243A; --mint:#5FD6B3; --mintsoft:#DDF6EC; --mintdeep:#2E9C7E;
+  --pink:#F7A8C4; --pinksoft:#FDE3EC; --ivory:#FFF8EC; --gold:#D9A94A; --ink:#4A2230;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--ivory);color:var(--ink);font-family:Georgia,"Times New Roman",serif;-webkit-text-size-adjust:100%}
+body{min-height:100vh;background:
+  radial-gradient(circle at 12% 18%,rgba(247,168,196,.25) 0 2px,transparent 3px) 0 0/46px 46px,
+  radial-gradient(circle at 70% 60%,rgba(95,214,179,.22) 0 2px,transparent 3px) 0 0/58px 58px,var(--ivory)}
+button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.stripe{height:14px;background:repeating-linear-gradient(-45deg,var(--red) 0 14px,#fff 14px 28px);box-shadow:0 2px 0 var(--pink)}
+header{display:flex;align-items:center;gap:12px;max-width:1120px;margin:0 auto;padding:12px 16px 4px}
+h1{flex:1;margin:0;text-align:center;color:var(--cran);font-weight:normal;font-size:clamp(22px,3.6vw,34px);line-height:1.15}
+h1 small{display:block;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mintdeep);margin-bottom:3px}
+.spacer{width:44px;flex:none}
+.back{display:inline-flex;min-width:44px;justify-content:center;align-items:center;gap:6px;border:2px solid var(--cran);background:#fff;color:var(--cran);border-radius:999px;padding:9px 14px;font-size:15px;min-height:44px;white-space:nowrap}
+.back:hover{background:var(--pinksoft)}
+.controls{max-width:900px;margin:6px auto 0;padding:0 14px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.levels{display:flex;gap:6px;background:#fff;border-radius:999px;padding:5px;box-shadow:0 0 0 3px var(--mintsoft),0 6px 16px rgba(46,156,126,.14);flex-wrap:wrap;justify-content:center}
+.levels button{border:none;background:transparent;border-radius:999px;padding:8px 14px;min-height:46px;color:var(--mintdeep);font-size:15px;line-height:1.1}
+.levels button small{display:block;font-size:11px;letter-spacing:.06em;opacity:.85}
+.levels button[aria-pressed="true"]{background:var(--cran);color:#fff}
+.levels button:focus-visible,.card:focus-visible,.again:focus-visible,.back:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;font-size:16px}
+.pill{background:#fff;border-radius:999px;padding:8px 14px;box-shadow:0 0 0 2px var(--pink);min-height:40px;display:inline-flex;align-items:center;gap:6px}
+.pill b{color:var(--cran);font-weight:normal;font-size:19px;min-width:1.2em;text-align:center}
+.again{border:none;border-radius:999px;padding:10px 20px;min-height:46px;font-size:17px;color:#fff;background:linear-gradient(var(--red),var(--cran));box-shadow:0 4px 0 #5e0d20,0 8px 14px rgba(140,21,48,.25)}
+.again:active{transform:translateY(2px);box-shadow:0 2px 0 #5e0d20}
+.boardwrap{display:flex;justify-content:center;padding:14px 10px 30px}
+.board{display:grid;gap:var(--gap,10px);grid-template-columns:repeat(var(--cols,4),var(--cw,120px))}
+.card{position:relative;width:var(--cw,120px);aspect-ratio:4/5;border:none;padding:0;background:transparent;perspective:900px;border-radius:14px}
+.inner{position:absolute;inset:0;transition:transform .45s cubic-bezier(.3,.7,.3,1.2);transform-style:preserve-3d}
+.card.up .inner,.card.matched .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
+.back-face{background:
+   radial-gradient(circle at 50% 50%,transparent 0 31%,rgba(255,255,255,0) 31%),
+   repeating-linear-gradient(-45deg,var(--red) 0 11px,#fff 11px 22px);
+  box-shadow:inset 0 0 0 4px #fff,inset 0 0 0 7px var(--pink),0 6px 14px rgba(140,21,48,.22)}
+.back-face .badge{position:absolute;left:50%;top:50%;width:46%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:var(--ivory);box-shadow:0 0 0 3px var(--gold),0 0 0 6px #fff,0 3px 8px rgba(74,34,48,.25);display:flex;align-items:center;justify-content:center}
+.back-face .badge svg{width:82%;height:82%}
+.front-face{transform:rotateY(180deg);background:radial-gradient(circle at 50% 42%,#fff 0 40%,var(--pinksoft) 100%);box-shadow:inset 0 0 0 3px var(--gold),inset 0 0 0 6px #fff,0 6px 14px rgba(140,21,48,.18);display:flex;align-items:center;justify-content:center}
+.front-face svg{width:84%;height:auto;display:block}
+.card.matched .front-face{background:radial-gradient(circle at 50% 42%,#fff 0 40%,var(--mintsoft) 100%);box-shadow:inset 0 0 0 3px var(--mint),inset 0 0 0 6px #fff,0 0 0 3px rgba(217,169,74,.55),0 6px 14px rgba(46,156,126,.25)}
+.card.pop{animation:pop .55s ease-out}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+.card .spark{position:absolute;inset:0;pointer-events:none}
+.card .spark i{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;background:var(--gold);clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);opacity:0;animation:spark .8s ease-out forwards}
+@keyframes spark{0%{opacity:1;transform:translate(0,0) scale(.4)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.1)}}
+.overlay{position:fixed;inset:0;background:rgba(74,34,48,.45);display:none;align-items:center;justify-content:center;z-index:60;padding:18px}
+.overlay.on{display:flex}
+.cele{position:relative;background:var(--ivory);border-radius:26px;max-width:420px;width:100%;padding:22px 22px 24px;text-align:center;box-shadow:0 0 0 5px #fff,0 0 0 9px var(--pink),0 24px 50px rgba(0,0,0,.3);animation:rise .5s cubic-bezier(.3,.7,.3,1.3)}
+@keyframes rise{from{transform:translateY(30px) scale(.92);opacity:0}to{transform:none;opacity:1}}
+.cele img{width:92px;display:block;margin:-62px auto 4px;filter:drop-shadow(0 6px 8px rgba(74,34,48,.3));animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg) translateY(-5px)}}
+.cele h2{margin:0 0 6px;color:var(--cran);font-weight:normal;font-size:28px}
+.cele p{margin:0 0 6px;font-size:17px;line-height:1.4}
+.cele .best{font-size:14px;color:var(--mintdeep);font-style:italic}
+.cele .row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.cele .row button{min-height:50px;border-radius:999px;padding:0 20px;font-size:17px}
+.cele .alt{border:2px solid var(--cran);background:#fff;color:var(--cran)}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:70;width:100%;height:100%}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.modal{position:fixed;inset:0;background:rgba(74,34,48,.5);display:none;align-items:center;justify-content:center;z-index:80;padding:20px}
+.modal.on{display:flex}
+.modal .card2{background:#fff;border-radius:20px;padding:22px;max-width:380px;text-align:center;box-shadow:0 0 0 4px var(--pink)}
+.modal h2{color:var(--cran);font-weight:normal;margin:0 0 8px}
+.modal button{min-height:48px;border-radius:999px;border:none;background:var(--cran);color:#fff;font-size:17px;padding:0 30px;margin-top:8px}
+@media (max-width:600px){
+  .back span{display:none}
+  .back{padding:9px 12px}
+  header{padding:10px 10px 2px}
+  .levels button{padding:7px 10px;font-size:14px}
+  .status{font-size:15px;gap:8px}
+  .boardwrap{padding:12px 8px 24px}
+}
+@media (prefers-reduced-motion: reduce){
+  .inner{transition:none}
+  .card.pop,.cele,.cele img{animation:none}
+  .card .spark{display:none}
+}
+</style>
+</head>
+<body>
+<div class="stripe"></div>
+<header>
+  <button class="back" id="backBtn" aria-label="Back to the Sweet Shop">&#8592; <span>Back to the Sweet Shop</span></button>
+  <h1><small>Day 9 &middot; Candy Cane Lane</small>Peppermint Pairs</h1>
+  <div class="spacer"></div>
+</header>
+<div class="controls">
+  <div class="levels" id="levels" role="group" aria-label="Choose a level">
+    <button data-level="elf" aria-pressed="true">Little Elf<small>8 cards</small></button>
+    <button data-level="helper" aria-pressed="false">Sweet Shop Helper<small>12 cards</small></button>
+    <button data-level="master" aria-pressed="false">Master Candy Maker<small>20 cards</small></button>
+  </div>
+  <div class="status">
+    <span class="pill">Moves <b id="moves">0</b></span>
+    <span class="pill">Pairs <b id="pairs">0/4</b></span>
+    <button class="again" id="againBtn">Play again</button>
+  </div>
+</div>
+<div class="boardwrap"><div class="board" id="board" role="grid" aria-label="Memory cards"></div></div>
+<p class="sr" id="live" aria-live="polite"></p>
+
+<div class="overlay" id="cele" role="dialog" aria-modal="true" aria-labelledby="celeTitle">
+  <div class="cele">
+    <img src="assets/pip.webp" alt="Pip the Gingerbread Boy cheering">
+    <h2 id="celeTitle">Sweet work!</h2>
+    <p id="celeMsg"></p>
+    <p class="best" id="celeBest"></p>
+    <div class="row">
+      <button class="again" id="celeAgain">Play again</button>
+      <button class="alt" id="celeNext">Try the next level</button>
+    </div>
+  </div>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<div class="modal" id="backModal" role="dialog" aria-modal="true">
+  <div class="card2">
+    <h2>Back to the Sweet Shop</h2>
+    <p>Your Sweet Shop is still open in your other tab. Close this tab to go back to it.</p>
+    <button id="backOk">OK</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ===== Safe return link (same rules as Days 1, 4 and 8) ===== */
+const SHOP_URL = "";
+const ALLOWED_RETURN_HOSTS = ["canva.site", "canva.com", "canva.link"];
+const RETURN_KEY = "candycanelane-return-url";
+const BEST_KEY = "candycanelane-day9-best-v1";
+function validReturnUrl(raw){
+  try{
+    if(!raw || raw.length>500) return null;
+    const u = new URL(raw);
+    if(u.protocol!=="https:" || u.username || u.password) return null;
+    const h = u.hostname.toLowerCase();
+    if(!ALLOWED_RETURN_HOSTS.some(a => h===a || h.endsWith("."+a))) return null;
+    return u.href;
+  }catch(e){ return null; }
+}
+function readParam(name){
+  try{
+    const q = new URLSearchParams(location.search).get(name);
+    if(q) return q;
+    return new URLSearchParams(location.hash.replace(/^#/,"")).get(name);
+  }catch(e){ return null; }
+}
+function resolveReturnUrl(){
+  const fromLink = validReturnUrl(readParam("return"));
+  if(fromLink){ try{ localStorage.setItem(RETURN_KEY, fromLink); }catch(e){} return fromLink; }
+  let fromRef = null;
+  try{ if(document.referrer) fromRef = validReturnUrl(new URL(document.referrer).origin + "/"); }catch(e){}
+  if(fromRef){ try{ if(!localStorage.getItem(RETURN_KEY)) localStorage.setItem(RETURN_KEY, fromRef); }catch(e){} }
+  let remembered = null;
+  try{ remembered = validReturnUrl(localStorage.getItem(RETURN_KEY)); }catch(e){}
+  return remembered || fromRef || validReturnUrl(SHOP_URL);
+}
+const RETURN_URL = resolveReturnUrl();
+const $ = id => document.getElementById(id);
+const reduceMotion = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ===== Original illustrations (hand-built SVG, made for Candy Cane Lane) ===== */
+const C = {cran:"#8C1530",red:"#D6243A",mint:"#5FD6B3",mintd:"#2E9C7E",mintl:"#8FE6CC",pink:"#F7A8C4",pinkd:"#E57FA4",pinks:"#FDE3EC",ivory:"#FFF8EC",gold:"#D9A94A",goldd:"#A8782A",goldl:"#F2CF7A",ginger:"#C27A42",gingerd:"#7E4421",ink:"#4A2230",white:"#FFFFFF"};
+const f = n => Math.round(n*10)/10;
+function starPts(cx,cy,R,r,n){n=n||5;let p=[];for(let i=0;i<n*2;i++){const a=-Math.PI/2+i*Math.PI/n,rad=i%2?r:R;p.push(f(cx+rad*Math.cos(a))+","+f(cy+rad*Math.sin(a)));}return p.join(" ");}
+function swirl(cx,cy,r,c2,n){let s="";for(let i=0;i<n;i++){const a0=i*2*Math.PI/n,a1=a0+Math.PI/n;
+  const p0=[cx+r*Math.cos(a0),cy+r*Math.sin(a0)],p1=[cx+r*Math.cos(a1),cy+r*Math.sin(a1)];
+  const q0=[cx+r*.55*Math.cos(a0-.7),cy+r*.55*Math.sin(a0-.7)],q1=[cx+r*.55*Math.cos(a1-.7),cy+r*.55*Math.sin(a1-.7)];
+  s+=`<path d="M${cx} ${cy}Q${f(q0[0])} ${f(q0[1])} ${f(p0[0])} ${f(p0[1])}A${r} ${r} 0 0 1 ${f(p1[0])} ${f(p1[1])}Q${f(q1[0])} ${f(q1[1])} ${cx} ${cy}Z" fill="${c2}"/>`;}return s;}
+function spiral(cx,cy,r,turns){let d="";const N=120;for(let i=0;i<=N;i++){const t=i/N,a=t*turns*2*Math.PI,rad=t*r;d+=(i?"L":"M")+f(cx+rad*Math.cos(a))+" "+f(cy+rad*Math.sin(a));}return d;}
+function bow(x,y,s,fill,stroke){return `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 0C-6 8-4 16 -2 18M0 0C6 8 4 16 2 18" stroke="${stroke}" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M0 0C-6 8-4 16 -2 18M0 0C6 8 4 16 2 18" stroke="${fill}" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M0 0C-12-10-20-4-16 3-13 8-5 5 0 0ZM0 0C12-10 20-4 16 3 13 8 5 5 0 0Z" fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/><circle r="3.6" fill="${fill}" stroke="${stroke}" stroke-width="2"/></g>`;}
+function sparkle(x,y,s,c){return `<path transform="translate(${x} ${y}) scale(${s})" d="M0-6L1.4-1.4 6 0 1.4 1.4 0 6-1.4 1.4-6 0-1.4-1.4Z" fill="${c||C.gold}"/>`;}
+function leaf(x,y,rot,s,fill,stroke){return `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${s})"><path d="M0 0C-4-6-4-10-2-16C-6-16-9-18-10-22C-6-24-6-27-6-31C-2-30 1-32 2-36C4-33 7-32 10-32C9-27 11-24 14-22C10-19 9-16 9-12C6-12 4-8 0 0Z" fill="${fill}" stroke="${stroke}" stroke-width="2" stroke-linejoin="round"/><path d="M0 0C2-10 2-22 2-33" stroke="${C.mintl}" stroke-width="1.6" fill="none" stroke-linecap="round"/></g>`;}
+
+const ART = [
+ {k:"cane",name:"Candy cane",svg:()=>{const d="M62 90V37a15.5 15.5 0 0 0-31 0v7";return `<path d="${d}" fill="none" stroke="${C.cran}" stroke-width="21" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${C.red}" stroke-width="15" stroke-dasharray="8 8"/><path d="M57 86V40" stroke="#fff" stroke-opacity=".5" stroke-width="3" stroke-linecap="round"/>${bow(62,66,1.05,C.mint,C.mintd)}${sparkle(86,22,1.2)}${sparkle(18,76,.9,C.pink)}`;}},
+ {k:"mint",name:"Peppermint candy",svg:()=>`<path d="M20 50L5 36Q3 50 5 64Z" fill="${C.pinks}" stroke="${C.pinkd}" stroke-width="2.5" stroke-linejoin="round"/><path d="M80 50L95 36Q97 50 95 64Z" fill="${C.pinks}" stroke="${C.pinkd}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="50" cy="50" r="31" fill="#fff" stroke="${C.cran}" stroke-width="3.5"/>${swirl(50,50,29,C.red,8)}<circle cx="50" cy="50" r="7" fill="#fff"/><ellipse cx="39" cy="36" rx="7" ry="4" fill="#fff" opacity=".7" transform="rotate(-35 39 36)"/>`},
+ {k:"ginger",name:"Gingerbread friend",svg:()=>{const sh=`<circle cx="50" cy="25" r="15"/><rect x="34" y="38" width="32" height="32" rx="12"/><rect x="18" y="40" width="64" height="13" rx="6.5"/><rect x="34" y="60" width="13" height="30" rx="6.5" transform="rotate(12 40 62)"/><rect x="53" y="60" width="13" height="30" rx="6.5" transform="rotate(-12 60 62)"/>`;return `<g fill="${C.gingerd}" stroke="${C.gingerd}" stroke-width="5" stroke-linejoin="round">${sh}</g><g fill="${C.ginger}">${sh}</g><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M23 41q3 5 0 11M77 41q-3 5 0 11M33 83q5 3 10 1M57 84q5 2 10-1"/><path d="M43 31q7 6 14 0"/></g><circle cx="44.5" cy="23" r="2.4" fill="${C.ink}"/><circle cx="55.5" cy="23" r="2.4" fill="${C.ink}"/><circle cx="40" cy="29" r="2.6" fill="${C.pink}" opacity=".9"/><circle cx="60" cy="29" r="2.6" fill="${C.pink}" opacity=".9"/><circle cx="50" cy="49" r="3.2" fill="${C.mint}" stroke="#fff" stroke-width="1.2"/><circle cx="50" cy="59" r="3.2" fill="${C.red}" stroke="#fff" stroke-width="1.2"/>${bow(50,40,.55,C.red,C.cran)}`;}},
+ {k:"tree",name:"Christmas tree",svg:()=>`<rect x="44" y="78" width="12" height="13" rx="2" fill="${C.gingerd}"/><g fill="${C.mintd}" stroke="#1F7A61" stroke-width="2.5" stroke-linejoin="round"><path d="M50 44L85 81H15Z"/><path d="M50 29L77 61H23Z"/><path d="M50 16L70 43H30Z"/></g><path d="M29 57Q50 66 72 55M22 76Q50 86 79 73" fill="none" stroke="${C.pink}" stroke-width="3" stroke-linecap="round"/><circle cx="40" cy="46" r="3.6" fill="${C.red}"/><circle cx="60" cy="50" r="3.4" fill="${C.goldl}"/><circle cx="34" cy="68" r="3.8" fill="${C.goldl}"/><circle cx="62" cy="70" r="3.8" fill="${C.red}"/><circle cx="48" cy="62" r="3.2" fill="#fff"/><polygon points="${starPts(50,14,10,4.2)}" fill="${C.gold}" stroke="${C.goldd}" stroke-width="1.8" stroke-linejoin="round"/>`},
+ {k:"star",name:"Golden star",svg:()=>`<polygon points="${starPts(50,53,38,17)}" fill="${C.gold}" stroke="${C.goldd}" stroke-width="3.5" stroke-linejoin="round"/><polygon points="${starPts(50,53,24,11)}" fill="${C.goldl}"/><circle cx="43" cy="51" r="2.6" fill="${C.ink}"/><circle cx="57" cy="51" r="2.6" fill="${C.ink}"/><path d="M45 58q5 4 10 0" stroke="${C.ink}" stroke-width="2.2" fill="none" stroke-linecap="round"/><circle cx="39" cy="57" r="2.6" fill="${C.pink}"/><circle cx="61" cy="57" r="2.6" fill="${C.pink}"/>${sparkle(16,20,1.3)}${sparkle(86,22,.9,C.mint)}${sparkle(84,86,1.1,C.pink)}`},
+ {k:"bauble",name:"Pink ornament",svg:()=>`<circle cx="50" cy="12" r="5" fill="none" stroke="${C.goldd}" stroke-width="2.5"/><rect x="41" y="17" width="18" height="11" rx="2.5" fill="${C.gold}" stroke="${C.goldd}" stroke-width="2"/><circle cx="50" cy="59" r="32" fill="${C.pink}" stroke="${C.cran}" stroke-width="3.5"/><path d="M20 56l7.5-7 7.5 7 7.5-7 7.5 7 7.5-7 7.5 7 7.5-7 7.5 7" fill="none" stroke="${C.cran}" stroke-width="4" stroke-linejoin="round"/><path d="M21 67l7.3-6 7.3 6 7.3-6 7.3 6 7.3-6 7.3 6 7.3-6 7.3 6" fill="none" stroke="#fff" stroke-width="3.2" stroke-linejoin="round"/><circle cx="35" cy="80" r="2.4" fill="#fff"/><circle cx="50" cy="84" r="2.4" fill="#fff"/><circle cx="65" cy="80" r="2.4" fill="#fff"/><ellipse cx="38" cy="41" rx="5" ry="9" fill="#fff" opacity=".6" transform="rotate(35 38 41)"/>`},
+ {k:"stocking",name:"Christmas stocking",svg:()=>`<path d="M37 30V60Q37 74 51 80L68 88Q82 94 86 82Q89 71 77 65L63 58V30Z" fill="${C.red}" stroke="${C.cran}" stroke-width="3" stroke-linejoin="round"/><path d="M73 63Q88 70 86 82Q84 89 77 90Q81 76 73 63Z" fill="${C.mint}"/><path d="M37 62Q38 74 49 79Q49 68 37 62Z" fill="${C.mint}"/><circle cx="46" cy="44" r="2.2" fill="#fff"/><circle cx="55" cy="52" r="2.2" fill="#fff"/><circle cx="47" cy="62" r="2.2" fill="#fff"/><circle cx="62" cy="72" r="2.2" fill="#fff"/><rect x="32" y="16" width="36" height="17" rx="7" fill="#fff" stroke="${C.cran}" stroke-width="3"/>${sparkle(84,24,1.1)}`},
+ {k:"present",name:"Gift box",svg:()=>`<rect x="18" y="45" width="64" height="44" rx="4" fill="${C.mint}" stroke="${C.mintd}" stroke-width="3"/><rect x="14" y="35" width="72" height="14" rx="4" fill="${C.mintl}" stroke="${C.mintd}" stroke-width="3"/><rect x="44.5" y="35" width="11" height="54" fill="${C.pink}" stroke="${C.pinkd}" stroke-width="2"/><circle cx="29" cy="60" r="2.4" fill="#fff"/><circle cx="34" cy="75" r="2.4" fill="#fff"/><circle cx="68" cy="58" r="2.4" fill="#fff"/><circle cx="72" cy="76" r="2.4" fill="#fff"/><path d="M50 35C40 16 22 20 28 31 32 38 44 37 50 35ZM50 35C60 16 78 20 72 31 68 38 56 37 50 35Z" fill="${C.pink}" stroke="${C.cran}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="50" cy="35" r="5.5" fill="${C.pinkd}" stroke="${C.cran}" stroke-width="2.2"/>`},
+ {k:"snowman",name:"Snowman",svg:()=>`<path d="M29 63L14 54M71 63L86 54M17 56l-2-6M83 56l2-6" stroke="${C.gingerd}" stroke-width="2.6" stroke-linecap="round"/><circle cx="50" cy="71" r="21" fill="#fff" stroke="#A9D9CB" stroke-width="3"/><circle cx="50" cy="39" r="15" fill="#fff" stroke="#A9D9CB" stroke-width="3"/><rect x="38" y="13" width="24" height="15" rx="2" fill="${C.ink}"/><rect x="38" y="22" width="24" height="3.5" fill="${C.red}"/><rect x="32" y="26" width="36" height="4.5" rx="2.2" fill="${C.ink}"/><circle cx="45" cy="37" r="2.2" fill="${C.ink}"/><circle cx="55" cy="37" r="2.2" fill="${C.ink}"/><path d="M50 41L63 44L50 45.5Z" fill="#F08A3C"/><path d="M44 47q6 3 12 0" stroke="${C.ink}" stroke-width="2" fill="none" stroke-linecap="round" stroke-dasharray="1 3"/><rect x="33" y="51" width="34" height="8" rx="4" fill="${C.mint}" stroke="${C.mintd}" stroke-width="2"/><rect x="54" y="55" width="9" height="17" rx="3" fill="${C.mint}" stroke="${C.mintd}" stroke-width="2" transform="rotate(-10 58 55)"/><circle cx="50" cy="67" r="2.6" fill="${C.red}"/><circle cx="50" cy="77" r="2.6" fill="${C.red}"/>`},
+ {k:"mitten",name:"Cosy mitten",svg:()=>{const sh=`<path d="M34 72V44Q34 20 54 20Q72 20 72 42V72Z"/><path d="M37 50Q24 44 21 55Q20 65 36 65Z"/>`;return `<g fill="${C.cran}" stroke="${C.cran}" stroke-width="6" stroke-linejoin="round">${sh}</g><g fill="${C.pink}">${sh}</g><path d="M53 36c-3-4-9-1-6 3l6 6 6-6c3-4-3-7-6-3z" fill="#fff"/><circle cx="43" cy="56" r="2.2" fill="#fff"/><circle cx="62" cy="58" r="2.2" fill="#fff"/><circle cx="52" cy="64" r="2.2" fill="#fff"/><rect x="30" y="69" width="46" height="18" rx="6" fill="#fff" stroke="${C.cran}" stroke-width="3"/><path d="M38 72v12M46 72v12M54 72v12M62 72v12M70 72v12" stroke="${C.pink}" stroke-width="2.4" stroke-linecap="round"/>`;}},
+ {k:"bell",name:"Jingle bell",svg:()=>`<path d="M50 20C34 20 29 35 29 50C29 63 23 69 18 73H82C77 69 71 63 71 50C71 35 66 20 50 20Z" fill="${C.gold}" stroke="${C.goldd}" stroke-width="3" stroke-linejoin="round"/><path d="M38 34Q34 44 35 58" stroke="#fff" stroke-opacity=".6" stroke-width="3.5" fill="none" stroke-linecap="round"/><rect x="15" y="71" width="70" height="9" rx="4.5" fill="${C.goldl}" stroke="${C.goldd}" stroke-width="2.5"/><circle cx="50" cy="85" r="6" fill="${C.goldd}"/>${leaf(48,22,-60,.55,C.mintd,"#1F7A61")}${leaf(52,22,60,.55,C.mintd,"#1F7A61")}<circle cx="50" cy="19" r="4.2" fill="${C.red}" stroke="${C.cran}" stroke-width="1.6"/>`},
+ {k:"holly",name:"Holly and berries",svg:()=>`${leaf(50,56,-58,1.15,C.mintd,"#1F7A61")}${leaf(50,56,58,1.15,C.mintd,"#1F7A61")}${leaf(50,56,180,.9,C.mint,C.mintd)}<circle cx="43" cy="55" r="7.5" fill="${C.red}" stroke="${C.cran}" stroke-width="2"/><circle cx="57" cy="55" r="7.5" fill="${C.red}" stroke="${C.cran}" stroke-width="2"/><circle cx="50" cy="45" r="7.5" fill="${C.red}" stroke="${C.cran}" stroke-width="2"/><circle cx="40.5" cy="52.5" r="2" fill="#fff" opacity=".8"/><circle cx="54.5" cy="52.5" r="2" fill="#fff" opacity=".8"/><circle cx="47.5" cy="42.5" r="2" fill="#fff" opacity=".8"/>`},
+ {k:"house",name:"Gingerbread house",svg:()=>`<rect x="63" y="20" width="10" height="20" fill="${C.ginger}" stroke="${C.gingerd}" stroke-width="2.5"/><rect x="61" y="17" width="14" height="5" rx="2.5" fill="#fff"/><rect x="22" y="46" width="56" height="42" fill="${C.ginger}" stroke="${C.gingerd}" stroke-width="3"/><path d="M13 52L50 19L87 52Z" fill="${C.cran}" stroke="${C.gingerd}" stroke-width="3" stroke-linejoin="round"/><path d="M13 52L50 19L87 52" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><path d="M18 54q4 5 8 0q4 5 8 0q4 5 8 0q4 5 8 0q4 5 8 0q4 5 8 0q4 5 8 0q4 5 8 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="50" cy="35" r="4" fill="${C.mint}" stroke="#fff" stroke-width="1.5"/><circle cx="38" cy="45" r="3" fill="${C.goldl}"/><circle cx="62" cy="45" r="3" fill="${C.pink}"/><path d="M42 88V72a8 8 0 0 1 16 0V88Z" fill="${C.pink}" stroke="${C.cran}" stroke-width="2.5"/><circle cx="54" cy="80" r="1.6" fill="${C.cran}"/><rect x="26" y="62" width="11" height="11" rx="1.5" fill="${C.goldl}" stroke="#fff" stroke-width="2"/><rect x="63" y="62" width="11" height="11" rx="1.5" fill="${C.goldl}" stroke="#fff" stroke-width="2"/><path d="M31.5 62v11M26 67.5h11M68.5 62v11M63 67.5h11" stroke="#fff" stroke-width="1.6"/><path d="M22 88h56" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`},
+ {k:"cocoa",name:"Hot cocoa",svg:()=>`<path d="M40 22q-5-6 0-12M52 22q-5-6 0-12" stroke="${C.pink}" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M68 46q16 0 16 14t-16 14" stroke="${C.cran}" stroke-width="10" fill="none"/><path d="M68 46q16 0 16 14t-16 14" stroke="${C.red}" stroke-width="5" fill="none"/><rect x="20" y="32" width="50" height="56" rx="9" fill="${C.red}" stroke="${C.cran}" stroke-width="3"/><rect x="21.5" y="52" width="47" height="9" fill="#fff"/><path d="M45 72c-2.6-3.4-8-1-5.4 2.8L45 80l5.4-5.2C53 71 47.6 68.6 45 72z" fill="#fff"/><ellipse cx="45" cy="34" rx="22" ry="6" fill="#7A4224" stroke="${C.cran}" stroke-width="2.5"/><rect x="31" y="25" width="10" height="9" rx="2.5" fill="#fff" stroke="#E8D5C4" stroke-width="1.5" transform="rotate(-12 36 29)"/><rect x="44" y="27" width="10" height="9" rx="2.5" fill="${C.pinks}" stroke="#E8D5C4" stroke-width="1.5" transform="rotate(10 49 31)"/><rect x="38" y="20" width="9" height="8" rx="2.5" fill="#fff" stroke="#E8D5C4" stroke-width="1.5"/>`},
+ {k:"lolly",name:"Swirly lollipop",svg:()=>`<rect x="46.5" y="52" width="7" height="42" rx="3.5" fill="#fff" stroke="#CDB4A2" stroke-width="1.8"/><circle cx="50" cy="33" r="26" fill="#fff" stroke="${C.cran}" stroke-width="3.5"/><path d="${spiral(50,33,23,3)}" fill="none" stroke="${C.pinkd}" stroke-width="6.5" stroke-linecap="round"/><ellipse cx="40" cy="22" rx="6" ry="3.5" fill="#fff" opacity=".75" transform="rotate(-35 40 22)"/>${bow(50,66,.75,C.mint,C.mintd)}${sparkle(84,70,1,C.gold)}`},
+ {k:"flake",name:"Snowflake",svg:()=>{let arms="";for(let i=0;i<6;i++){arms+=`<g transform="rotate(${i*60} 50 50)"><path d="M50 50V14M50 25L42 17M50 25L58 17M50 36L43 29M50 36L57 29"/></g>`;}return `<g fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke="${C.mintd}" stroke-width="8">${arms}</g><g stroke="${C.mintl}" stroke-width="3.6">${arms}</g></g><polygon points="${starPts(50,50,9,9,6)}" fill="${C.gold}" stroke="${C.goldd}" stroke-width="2"/>${sparkle(18,82,1)}${sparkle(84,18,.9,C.pink)}`;}},
+ {k:"cupcake",name:"Frosted cupcake",svg:()=>`<path d="M27 58H73L65 89H35Z" fill="${C.mint}" stroke="${C.mintd}" stroke-width="3" stroke-linejoin="round"/><path d="M36 60l3 28M45 60l1.5 28M55 60l-1.5 28M64 60l-3 28" stroke="${C.mintd}" stroke-width="2" opacity=".7"/><path d="M23 60C16 51 25 42 33 44C33 32 47 27 54 35C61 28 77 33 73 46C81 47 83 58 77 61Z" fill="${C.pink}" stroke="${C.pinkd}" stroke-width="3" stroke-linejoin="round"/><path d="M33 46q8 4 16-2M55 40q8 2 12 8" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".7"/><rect x="38" y="50" width="6" height="2.6" rx="1.3" fill="${C.mintd}" transform="rotate(30 41 51)"/><rect x="58" y="51" width="6" height="2.6" rx="1.3" fill="${C.gold}" transform="rotate(-25 61 52)"/><rect x="48" y="45" width="6" height="2.6" rx="1.3" fill="#fff" transform="rotate(70 51 46)"/><rect x="66" y="49" width="6" height="2.6" rx="1.3" fill="${C.red}" transform="rotate(15 69 50)"/><path d="M55 25Q58 16 64 13" stroke="${C.gingerd}" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="54" cy="29" r="7" fill="${C.red}" stroke="${C.cran}" stroke-width="2.2"/><circle cx="51.5" cy="26.5" r="2" fill="#fff" opacity=".8"/>`},
+ {k:"hat",name:"Santa hat",svg:()=>`<path d="M22 70C29 42 44 24 64 23C76 22 84 29 85 39C78 34 71 36 67 44C61 54 66 63 71 70Z" fill="${C.red}" stroke="${C.cran}" stroke-width="3" stroke-linejoin="round"/><path d="M40 52Q48 38 60 32" stroke="#fff" stroke-opacity=".35" stroke-width="4" fill="none" stroke-linecap="round"/><rect x="14" y="66" width="68" height="18" rx="9" fill="#fff" stroke="#E2CFC0" stroke-width="2.5"/><circle cx="85" cy="42" r="10" fill="#fff" stroke="#E2CFC0" stroke-width="2.5"/><circle cx="26" cy="75" r="1.8" fill="#EADDD0"/><circle cx="40" cy="73" r="1.8" fill="#EADDD0"/><circle cx="55" cy="77" r="1.8" fill="#EADDD0"/><circle cx="70" cy="73" r="1.8" fill="#EADDD0"/>`},
+ {k:"wreath",name:"Holiday wreath",svg:()=>{let lv="";for(let i=0;i<20;i++){const a=i*Math.PI*2/20,x=50+28*Math.cos(a),y=48+28*Math.sin(a);lv+=`<ellipse cx="${f(x)}" cy="${f(y)}" rx="9" ry="5" fill="${i%2?C.mint:C.mintd}" transform="rotate(${f(a*180/Math.PI+60)} ${f(x)} ${f(y)})"/>`;}
+   return `<circle cx="50" cy="48" r="28" fill="none" stroke="#1F7A61" stroke-width="20"/>${lv}<circle cx="32" cy="30" r="3.4" fill="${C.red}"/><circle cx="70" cy="29" r="3.4" fill="${C.red}"/><circle cx="76" cy="56" r="3.4" fill="${C.goldl}"/><circle cx="24" cy="58" r="3.4" fill="${C.goldl}"/><circle cx="50" cy="19" r="3.4" fill="${C.pink}"/>${bow(50,76,1.15,C.red,C.cran)}`;}}
+];
+const SVG = art => `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">${art.svg()}</svg>`;
+const BACK_BADGE = `<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="40" fill="#fff" stroke="${C.cran}" stroke-width="5"/>${swirl(50,50,37,C.red,8)}<circle cx="50" cy="50" r="9" fill="#fff"/></svg>`;
+
+/* ===== Fair randomness: crypto-backed Fisher–Yates ===== */
+function randInt(n){ // unbiased integer in [0, n)
+  if(window.crypto && crypto.getRandomValues){
+    const max = Math.floor(0x100000000 / n) * n, buf = new Uint32Array(1);
+    let x; do{ crypto.getRandomValues(buf); x = buf[0]; }while(x >= max);
+    return x % n;
+  }
+  return Math.floor(Math.random()*n);
+}
+function shuffle(arr){ const a = arr.slice(); for(let i=a.length-1;i>0;i--){ const j=randInt(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ===== Game ===== */
+const LEVELS = {
+  elf:{name:"Little Elf",pairs:4,next:"helper"},
+  helper:{name:"Sweet Shop Helper",pairs:6,next:"master"},
+  master:{name:"Master Candy Maker",pairs:10,next:null}
+};
+const board = $("board");
+let level = "elf", deck = [], up = [], lock = false, moves = 0, found = 0, lastKeys = [], lastSig = "";
+const byKey = Object.fromEntries(ART.map(a=>[a.k,a]));
+
+function pickKeys(n){
+  // Prefer pictures that were not on the last board, so each round feels new; random among them.
+  const fresh = shuffle(ART.map(a=>a.k).filter(k=>!lastKeys.includes(k)));
+  const reuse = shuffle(lastKeys.slice());
+  return fresh.concat(reuse).slice(0,n);
+}
+function buildDeck(){
+  const n = LEVELS[level].pairs;
+  let keys, cards, sig, tries = 0;
+  do{
+    keys = pickKeys(n);
+    cards = shuffle(keys.concat(keys));
+    sig = level + ":" + cards.join(",");
+    tries++;
+  }while(sig === lastSig && tries < 20);
+  lastKeys = keys; lastSig = sig;
+  return cards;
+}
+function newGame(){
+  hideCele();
+  deck = buildDeck(); up = []; lock = false; moves = 0; found = 0;
+  board.innerHTML = "";
+  deck.forEach((k,i)=>{
+    const b = document.createElement("button");
+    b.className = "card"; b.type = "button"; b.dataset.i = i; b.dataset.k = k;
+    b.setAttribute("aria-label", `Card ${i+1}, face down`);
+    b.innerHTML = `<span class="inner"><span class="face back-face"><span class="badge">${BACK_BADGE}</span></span><span class="face front-face">${SVG(byKey[k])}</span></span><span class="spark"></span>`;
+    b.addEventListener("click", ()=>flip(b));
+    board.appendChild(b);
+  });
+  layout(); updateStatus();
+  say(`New ${LEVELS[level].name} game. ${n2w(deck.length)} cards. Find ${LEVELS[level].pairs} pairs.`);
+}
+function n2w(n){return String(n);}
+function flip(b){
+  if(lock || b.classList.contains("up") || b.classList.contains("matched")) return;
+  b.classList.add("up"); up.push(b);
+  b.setAttribute("aria-label", `Card ${+b.dataset.i+1}, ${byKey[b.dataset.k].name}`);
+  if(up.length < 2) return;
+  moves++; updateStatus();
+  const [a, c] = up;
+  if(a.dataset.k === c.dataset.k){
+    up = [];
+    found++;
+    setTimeout(()=>{
+      [a,c].forEach(x=>{ x.classList.remove("up"); x.classList.add("matched","pop"); x.setAttribute("aria-label", `Card ${+x.dataset.i+1}, ${byKey[x.dataset.k].name}, matched`); burst(x); setTimeout(()=>x.classList.remove("pop"),600); });
+      updateStatus();
+      say(`Match! ${byKey[a.dataset.k].name}. ${found} of ${LEVELS[level].pairs} pairs found.`);
+      if(found === LEVELS[level].pairs) setTimeout(celebrate, reduceMotion()?200:650);
+    }, reduceMotion()?0:380);
+  }else{
+    lock = true;
+    say(`${byKey[a.dataset.k].name} and ${byKey[c.dataset.k].name}. Not a match, they will turn back over.`);
+    setTimeout(()=>{
+      [a,c].forEach(x=>{ x.classList.remove("up"); x.setAttribute("aria-label", `Card ${+x.dataset.i+1}, face down`); });
+      up = []; lock = false;
+    }, 1000);
+  }
+}
+function updateStatus(){ $("moves").textContent = moves; $("pairs").textContent = `${found}/${LEVELS[level].pairs}`; }
+function say(t){ const l=$("live"); l.textContent=""; setTimeout(()=>{l.textContent=t;},30); }
+function burst(card){
+  if(reduceMotion()) return;
+  const s = card.querySelector(".spark"); s.innerHTML = "";
+  for(let i=0;i<8;i++){ const a=i*Math.PI/4, d=card.offsetWidth*.55; const el=document.createElement("i");
+    el.style.setProperty("--dx", Math.round(Math.cos(a)*d)+"px"); el.style.setProperty("--dy", Math.round(Math.sin(a)*d)+"px");
+    if(i%2) el.style.background = "#F7A8C4"; s.appendChild(el); }
+}
+
+/* ===== Layout: biggest comfortable cards for the screen ===== */
+function layout(){
+  const n = deck.length, gap = innerWidth < 600 ? 8 : 12;
+  const W = Math.min(document.documentElement.clientWidth - 20, 980);
+  const top = board.getBoundingClientRect().top + scrollY;
+  // On phones, allow a little scrolling if it means bigger, easier-to-tap cards.
+  const H0 = Math.max(innerHeight - top - 22, 340);
+  const H = H0 * (innerWidth < 600 && H0 < 520 ? 1.2 : 1);
+  let best = {cw:0, cols:4};
+  for(let cols=2; cols<=6; cols++){
+    if(n % cols) continue;
+    const rows = n / cols;
+    const cwByW = (W - gap*(cols-1)) / cols;
+    const cwByH = ((H - gap*(rows-1)) / rows) * 0.8;
+    const cw = Math.min(cwByW, cwByH, 170);
+    if(cw > best.cw + 0.5) best = {cw, cols};
+  }
+  // Never let cards get too small to tap; allow scrolling instead.
+  const minCw = Math.min(84, (W - gap*3)/4);
+  if(best.cw < minCw){ best.cols = Math.min(best.cols, Math.max(2, Math.floor((W+gap)/(minCw+gap)))); while(n % best.cols) best.cols--; best.cw = Math.min((W - gap*(best.cols-1))/best.cols, 170); }
+  board.style.setProperty("--cols", best.cols);
+  board.style.setProperty("--cw", Math.floor(best.cw) + "px");
+  board.style.setProperty("--gap", gap + "px");
+  board.dataset.cols = best.cols;
+}
+let rT; addEventListener("resize", ()=>{ clearTimeout(rT); rT = setTimeout(layout, 120); });
+
+/* ===== Keyboard: arrow keys move between cards; Enter/Space flips ===== */
+board.addEventListener("keydown", e=>{
+  const cards=[...board.children], i=cards.indexOf(document.activeElement); if(i<0) return;
+  const cols=+board.dataset.cols||4; let j=null;
+  if(e.key==="ArrowRight") j=i+1; else if(e.key==="ArrowLeft") j=i-1;
+  else if(e.key==="ArrowDown") j=i+cols; else if(e.key==="ArrowUp") j=i-cols;
+  else if(e.key==="Home") j=0; else if(e.key==="End") j=cards.length-1;
+  if(j===null) return; e.preventDefault();
+  if(j>=0 && j<cards.length) cards[j].focus();
+});
+
+/* ===== Celebration ===== */
+function bestFor(lv){ try{ return (JSON.parse(localStorage.getItem(BEST_KEY)||"{}"))[lv]||null; }catch(e){ return null; } }
+function setBest(lv,m){ try{ const o=JSON.parse(localStorage.getItem(BEST_KEY)||"{}"); o[lv]=m; localStorage.setItem(BEST_KEY, JSON.stringify(o)); }catch(e){} }
+function celebrate(){
+  const L = LEVELS[level], prev = bestFor(level);
+  $("celeTitle").textContent = ["Sweet work!","Hooray!","You did it!","Peppermint perfect!"][randInt(4)];
+  $("celeMsg").textContent = `You found all ${L.pairs} pairs in ${moves} moves. Pip is so proud of you!`;
+  let bestTxt = "";
+  if(prev===null || moves < prev){ setBest(level, moves); if(prev!==null) bestTxt = `That's your best ${L.name} game yet!`; }
+  else bestTxt = `Your best ${L.name} game: ${prev} moves.`;
+  $("celeBest").textContent = bestTxt;
+  $("celeNext").style.display = L.next ? "" : "none";
+  $("cele").classList.add("on");
+  $("celeAgain").focus();
+  confetti();
+}
+function hideCele(){ $("cele").classList.remove("on"); }
+function confetti(){
+  if(reduceMotion()) return;
+  const cv=$("confetti"), x=cv.getContext("2d"), dpr=Math.min(devicePixelRatio||1,2);
+  cv.width=innerWidth*dpr; cv.height=innerHeight*dpr; x.setTransform(dpr,0,0,dpr,0,0);
+  const cols=["#D6243A","#5FD6B3","#F7A8C4","#D9A94A","#FFFFFF","#8C1530"];
+  const ps=Array.from({length:140},()=>({x:Math.random()*innerWidth,y:-20-Math.random()*innerHeight*.5,vx:(Math.random()-.5)*2.2,vy:2+Math.random()*3,r:Math.random()*Math.PI,vr:(Math.random()-.5)*.2,w:6+Math.random()*6,h:8+Math.random()*8,c:cols[randInt(cols.length)]}));
+  const t0=performance.now();
+  (function tick(t){ x.clearRect(0,0,innerWidth,innerHeight);
+    ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.vy+=.03; x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore();});
+    if(t-t0<3600) requestAnimationFrame(tick); else x.clearRect(0,0,innerWidth,innerHeight); })(t0);
+}
+
+/* ===== Controls ===== */
+function setLevel(lv){ level=lv; [...$("levels").children].forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.level===lv))); newGame(); }
+$("levels").addEventListener("click", e=>{ const b=e.target.closest("button[data-level]"); if(b) setLevel(b.dataset.level); });
+$("againBtn").onclick = newGame;
+$("celeAgain").onclick = ()=>{ newGame(); board.firstChild && board.firstChild.focus(); };
+$("celeNext").onclick = ()=>{ const nx=LEVELS[level].next; if(nx){ setLevel(nx); board.firstChild && board.firstChild.focus(); } };
+$("cele").addEventListener("keydown", e=>{ if(e.key==="Escape") hideCele(); });
+$("backBtn").onclick = () => {
+  if(RETURN_URL){ location.assign(RETURN_URL); return; }
+  if(window.opener){ try{ window.close(); }catch(e){} }
+  $("backModal").classList.add("on");
+};
+$("backOk").onclick = () => $("backModal").classList.remove("on");
+
+newGame();
+})();
+</script>
+</body>
+</html>
