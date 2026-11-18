@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Day 16 · Marshmallow Match · Candy Cane Lane</title>
+<style>
+:root{
+  --cran:#8C1530; --red:#D6243A; --mint:#5FD6B3; --mintsoft:#DDF6EC; --mintdeep:#2E9C7E;
+  --pink:#F7A8C4; --pinksoft:#FDE3EC; --ivory:#FFF8EC; --gold:#D9A94A; --ink:#4A2230;
+  --fall:240ms; --swap:170ms; --pop:230ms;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--ivory);color:var(--ink);font-family:Georgia,"Times New Roman",serif;-webkit-text-size-adjust:100%}
+body{min-height:100vh;background:
+  radial-gradient(circle at 12% 18%,rgba(247,168,196,.25) 0 2px,transparent 3px) 0 0/46px 46px,
+  radial-gradient(circle at 70% 60%,rgba(95,214,179,.22) 0 2px,transparent 3px) 0 0/58px 58px,var(--ivory)}
+button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.stripe{height:14px;background:repeating-linear-gradient(-45deg,var(--red) 0 14px,#fff 14px 28px);box-shadow:0 2px 0 var(--pink)}
+header{display:flex;align-items:center;gap:12px;max-width:1120px;margin:0 auto;padding:12px 16px 4px}
+h1{flex:1;margin:0;text-align:center;color:var(--cran);font-weight:normal;font-size:clamp(22px,3.6vw,34px);line-height:1.15}
+h1 small{display:block;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mintdeep);margin-bottom:3px}
+.spacer{width:44px;flex:none}
+.back{display:inline-flex;min-width:44px;justify-content:center;align-items:center;gap:6px;border:2px solid var(--cran);background:#fff;color:var(--cran);border-radius:999px;padding:9px 14px;font-size:15px;min-height:44px;white-space:nowrap}
+.back:hover{background:var(--pinksoft)}
+.back:focus-visible,.again:focus-visible,#board:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.wrap{max-width:560px;margin:0 auto;padding:6px 12px 28px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.how{margin:0;text-align:center;font-size:16px;line-height:1.35;max-width:480px}
+.status{display:flex;align-items:center;gap:10px;width:100%;max-width:520px}
+.goal{flex:1;background:#fff;border-radius:999px;padding:6px 8px 6px 14px;box-shadow:0 0 0 2px var(--pink);display:flex;align-items:center;gap:10px;min-height:46px}
+.goal .lbl{font-size:15px;white-space:nowrap}
+.goal .lbl b{color:var(--cran);font-weight:normal;font-size:18px}
+.bar{flex:1;height:14px;border-radius:999px;background:var(--pinksoft);overflow:hidden;box-shadow:inset 0 1px 2px rgba(74,34,48,.15)}
+.bar i{display:block;height:100%;width:0;border-radius:999px;background:repeating-linear-gradient(-45deg,var(--red) 0 8px,#fff 8px 16px);transition:width .35s ease}
+.again{border:none;border-radius:999px;padding:10px 18px;min-height:46px;font-size:16px;color:#fff;background:linear-gradient(var(--red),var(--cran));box-shadow:0 4px 0 #5e0d20,0 8px 14px rgba(140,21,48,.25);white-space:nowrap}
+.again:active{transform:translateY(2px);box-shadow:0 2px 0 #5e0d20}
+.tray{position:relative;width:min(100%,520px,calc(100svh - 230px));min-width:280px;aspect-ratio:1;border-radius:24px;padding:3.2%;
+  background:linear-gradient(#fff,#FFF3E2);box-shadow:0 0 0 4px #fff,0 0 0 7px var(--pink),0 14px 30px rgba(140,21,48,.18)}
+#board{position:relative;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:16px;outline:none;
+  background:
+   linear-gradient(90deg,rgba(247,168,196,.18) 1px,transparent 1px) 0 0/calc(100%/7) calc(100%/7),
+   linear-gradient(rgba(247,168,196,.18) 1px,transparent 1px) 0 0/calc(100%/7) calc(100%/7),
+   var(--pinksoft)}
+.pc{position:absolute;left:0;top:0;width:calc(100%/7);height:calc(100%/7);transition:transform var(--fall) cubic-bezier(.35,.05,.4,1.25);will-change:transform}
+.pc.swap{transition-duration:var(--swap);transition-timing-function:ease-in-out}
+.pc .in{position:absolute;inset:4%;transition:transform .15s ease,opacity var(--pop) ease}
+.pc svg{width:100%;height:100%;display:block;pointer-events:none}
+.pc.sel .in{transform:scale(1.12)}
+.pc.sel::after{content:"";position:absolute;inset:2%;border-radius:30%;box-shadow:0 0 0 3px var(--gold),0 0 12px 2px rgba(217,169,74,.6);pointer-events:none}
+.pc.pop .in{transform:scale(1.35);opacity:0}
+.pc.hint .in{animation:wig 1s ease-in-out 2}
+@keyframes wig{0%,100%{transform:rotate(0)}25%{transform:rotate(-9deg) scale(1.06)}75%{transform:rotate(9deg) scale(1.06)}}
+.pc.nope .in{animation:nope .3s ease}
+@keyframes nope{0%,100%{transform:translateX(0)}30%{transform:translateX(-6%)}70%{transform:translateX(6%)}}
+.cursor{position:absolute;left:0;top:0;width:calc(100%/7);height:calc(100%/7);pointer-events:none;display:none}
+.cursor::before{content:"";position:absolute;inset:3%;border-radius:28%;border:3px dashed var(--cran)}
+#board:focus-visible .cursor{display:block}
+.spark{position:absolute;width:12px;height:12px;margin:-6px;pointer-events:none;background:var(--gold);clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);animation:spk .6s ease-out forwards}
+@keyframes spk{0%{opacity:1;transform:translate(0,0) scale(.4)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1)}}
+.toast{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.9);background:rgba(255,255,255,.95);color:var(--cran);border-radius:999px;padding:10px 18px;font-size:18px;box-shadow:0 0 0 3px var(--pink),0 8px 18px rgba(74,34,48,.2);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;white-space:nowrap;z-index:5}
+.toast.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.keys{font-size:13px;color:#7a5a63;font-style:italic;text-align:center;margin:0}
+.overlay{position:fixed;inset:0;background:rgba(74,34,48,.45);display:none;align-items:center;justify-content:center;z-index:60;padding:18px}
+.overlay.on{display:flex}
+.cele{position:relative;background:var(--ivory);border-radius:26px;max-width:420px;width:100%;padding:22px 22px 24px;text-align:center;box-shadow:0 0 0 5px #fff,0 0 0 9px var(--pink),0 24px 50px rgba(0,0,0,.3);animation:rise .5s cubic-bezier(.3,.7,.3,1.3)}
+@keyframes rise{from{transform:translateY(30px) scale(.92);opacity:0}to{transform:none;opacity:1}}
+.cele img{width:92px;display:block;margin:-62px auto 4px;filter:drop-shadow(0 6px 8px rgba(74,34,48,.3));animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg) translateY(-5px)}}
+.cele h2{margin:0 0 6px;color:var(--cran);font-weight:normal;font-size:28px}
+.cele p{margin:0 0 6px;font-size:17px;line-height:1.4}
+.cele .best{font-size:14px;color:var(--mintdeep);font-style:italic}
+.cele .row{margin-top:14px}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:70;width:100%;height:100%}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.modal{position:fixed;inset:0;background:rgba(74,34,48,.5);display:none;align-items:center;justify-content:center;z-index:80;padding:20px}
+.modal.on{display:flex}
+.modal .card2{background:#fff;border-radius:20px;padding:22px;max-width:380px;text-align:center;box-shadow:0 0 0 4px var(--pink)}
+.modal h2{color:var(--cran);font-weight:normal;margin:0 0 8px}
+.modal button{min-height:48px;border-radius:999px;border:none;background:var(--cran);color:#fff;font-size:17px;padding:0 30px;margin-top:8px}
+@media (max-width:600px){
+  .back span{display:none}
+  .back{padding:9px 12px}
+  header{padding:10px 10px 2px}
+  .how{font-size:15px}
+  .goal .lbl{font-size:14px}
+  .again{padding:10px 14px;font-size:15px}
+  .tray{width:min(100%,calc(100svh - 210px));padding:2.6%}
+}
+@media (prefers-reduced-motion: reduce){
+  :root{--fall:1ms;--swap:1ms;--pop:1ms}
+  .pc.hint .in,.pc.nope .in,.cele,.cele img{animation:none}
+  .pc.hint::after{content:"";position:absolute;inset:2%;border-radius:30%;box-shadow:0 0 0 3px var(--mint)}
+  .spark{display:none}
+  .bar i{transition:none}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+ <defs>
+  <radialGradient id="gPink" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#FFEAF2"/><stop offset=".55" stop-color="#F7A8C4"/><stop offset="1" stop-color="#E07FA4"/></radialGradient>
+  <radialGradient id="gMint" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#EAFCF6"/><stop offset=".55" stop-color="#7FE2C6"/><stop offset="1" stop-color="#3FBF9C"/></radialGradient>
+  <radialGradient id="gCran" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="#F76A7D"/><stop offset=".55" stop-color="#D6243A"/><stop offset="1" stop-color="#9E1A33"/></radialGradient>
+  <radialGradient id="gIvory" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".6" stop-color="#FFF2DA"/><stop offset="1" stop-color="#E9CFA5"/></radialGradient>
+  <radialGradient id="gGold" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#FFF3CC"/><stop offset=".55" stop-color="#F2CF7A"/><stop offset="1" stop-color="#CF9B3E"/></radialGradient>
+  <clipPath id="cCyl"><rect x="17" y="27" width="66" height="57" rx="17"/></clipPath>
+ </defs>
+</svg>
+<div class="stripe"></div>
+<header>
+  <button class="back" id="backBtn" aria-label="Back to the Sweet Shop">&#8592; <span>Back to the Sweet Shop</span></button>
+  <h1><small>Day 16 &middot; Candy Cane Lane</small>Marshmallow Match</h1>
+  <div class="spacer"></div>
+</header>
+<div class="wrap">
+  <p class="how">Swap two marshmallows that are side by side to make a row of <b>3 or more</b> the same. Collect <b id="goalTxt">30</b> to fill the jar!</p>
+  <div class="status">
+    <div class="goal" aria-label="Progress"><span class="lbl">Collected <b id="got">0</b>/<span id="goalN">30</span></span><div class="bar"><i id="barFill"></i></div></div>
+    <button class="again" id="againBtn">Play again</button>
+  </div>
+  <div class="tray">
+    <div id="board" tabindex="0" role="application" aria-label="Marshmallow board. Use arrow keys to move, Enter to pick a marshmallow, then an arrow key to swap it.">
+      <div class="cursor" id="cursor"></div>
+      <div class="toast" id="toast"></div>
+    </div>
+  </div>
+  <p class="keys">Tap one marshmallow, then a neighbour. Or slide it. Keyboard: arrows to move, Enter to pick, arrow to swap.</p>
+</div>
+<p class="sr" id="live" aria-live="polite"></p>
+
+<div class="overlay" id="cele" role="dialog" aria-modal="true" aria-labelledby="celeTitle">
+  <div class="cele">
+    <img src="assets/pip.webp" alt="Pip the Gingerbread Boy cheering">
+    <h2 id="celeTitle">Sweet work!</h2>
+    <p id="celeMsg"></p>
+    <p class="best" id="celeBest"></p>
+    <div class="row"><button class="again" id="celeAgain">Play again</button></div>
+  </div>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<div class="modal" id="backModal" role="dialog" aria-modal="true">
+  <div class="card2">
+    <h2>Back to the Sweet Shop</h2>
+    <p>Your Sweet Shop is still open in your other tab. Close this tab to go back to it.</p>
+    <button id="backOk">OK</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ===== Safe return link (same rules as the other Candy Cane Lane days) ===== */
+const SHOP_URL = "";
+const ALLOWED_RETURN_HOSTS = ["canva.site", "canva.com", "canva.link"];
+const RETURN_KEY = "candycanelane-return-url";
+const BEST_KEY = "candycanelane-day16-best-v1";
+function validReturnUrl(raw){
+  try{
+    if(!raw || raw.length>500) return null;
+    const u = new URL(raw);
+    if(u.protocol!=="https:" || u.username || u.password) return null;
+    const h = u.hostname.toLowerCase();
+    if(!ALLOWED_RETURN_HOSTS.some(a => h===a || h.endsWith("."+a))) return null;
+    return u.href;
+  }catch(e){ return null; }
+}
+function readParam(name){
+  try{
+    const q = new URLSearchParams(location.search).get(name);
+    if(q) return q;
+    return new URLSearchParams(location.hash.replace(/^#/,"")).get(name);
+  }catch(e){ return null; }
+}
+function resolveReturnUrl(){
+  const fromLink = validReturnUrl(readParam("return"));
+  if(fromLink){ try{ localStorage.setItem(RETURN_KEY, fromLink); }catch(e){} return fromLink; }
+  let fromRef = null;
+  try{ if(document.referrer) fromRef = validReturnUrl(new URL(document.referrer).origin + "/"); }catch(e){}
+  if(fromRef){ try{ if(!localStorage.getItem(RETURN_KEY)) localStorage.setItem(RETURN_KEY, fromRef); }catch(e){} }
+  let remembered = null;
+  try{ remembered = validReturnUrl(localStorage.getItem(RETURN_KEY)); }catch(e){}
+  return remembered || fromRef || validReturnUrl(SHOP_URL);
+}
+const RETURN_URL = resolveReturnUrl();
+const $ = id => document.getElementById(id);
+$("backBtn").onclick = () => {
+  if((window.opener||document.referrer)&&history.length<=1){ try{ window.close(); }catch(e){} setTimeout(function(){ if(RETURN_URL){ window.location.assign(RETURN_URL); } else { $("backModal").classList.add("on"); } },400); return; }
+  if(RETURN_URL){ location.assign(RETURN_URL); return; }
+  if(window.opener){ try{ window.close(); }catch(e){} }
+  $("backModal").classList.add("on");
+};
+$("backOk").onclick = () => $("backModal").classList.remove("on");
+
+const reduce = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const wait = ms => new Promise(r => setTimeout(r, reduce() ? 0 : ms));
+
+/* ===== Fair randomness ===== */
+function randInt(n){
+  if(window.crypto && crypto.getRandomValues){
+    const max = Math.floor(0x100000000 / n) * n, buf = new Uint32Array(1); let x;
+    do{ crypto.getRandomValues(buf); x = buf[0]; }while(x >= max);
+    return x % n;
+  }
+  return Math.floor(Math.random()*n);
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=randInt(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ===== Original marshmallow illustrations ===== */
+const SH = '<ellipse cx="50" cy="89" rx="31" ry="6" fill="rgba(74,34,48,.16)"/>';
+const HL = (x,y,rx,ry,rot) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#fff" opacity=".55" transform="rotate(${rot} ${x} ${y})"/>`;
+let snow=""; for(let i=0;i<6;i++){ snow+=`<path transform="rotate(${i*60} 50 52)" d="M50 52V33M50 39l-5-5M50 39l5-5"/>`; }
+const TYPES = [
+ {name:"pink heart marshmallow", svg: SH+'<rect x="14" y="17" width="72" height="68" rx="25" fill="url(#gPink)" stroke="#D97399" stroke-width="2"/>'+HL(34,31,12,6,-20)+'<path d="M50 70c-14-9-20-16-20-24 0-6 5-10 10-10 4 0 7 2 10 6 3-4 6-6 10-6 5 0 10 4 10 10 0 8-6 15-20 24z" fill="#D6243A" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>'},
+ {name:"mint snowflake marshmallow", svg: SH+'<circle cx="50" cy="52" r="36" fill="url(#gMint)" stroke="#2E9C7E" stroke-width="2"/>'+HL(36,34,11,6,-30)+`<g fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round">${snow}</g><circle cx="50" cy="52" r="4.5" fill="#fff"/>`},
+ {name:"striped cranberry marshmallow", svg: SH+'<rect x="17" y="27" width="66" height="57" rx="17" fill="url(#gCran)" stroke="#8C1530" stroke-width="2"/><g clip-path="url(#cCyl)" fill="#FFF3E2" opacity=".92"><path d="M8 88L40 20h10L18 88z"/><path d="M34 88L66 20h10L44 88z"/><path d="M60 88L92 20h10L70 88z"/></g><ellipse cx="50" cy="29" rx="33" ry="11" fill="#F27C8C" stroke="#8C1530" stroke-width="2"/><ellipse cx="44" cy="27" rx="14" ry="4" fill="#fff" opacity=".45"/>'},
+ {name:"ivory star marshmallow", svg: SH+'<path d="M50.0 21.0Q62.7 13.0 68.2 26.9Q83.2 27.9 79.5 42.4Q91.0 52.0 79.5 61.6Q83.2 76.1 68.2 77.1Q62.7 91.0 50.0 83.0Q37.3 91.0 31.8 77.1Q16.8 76.1 20.5 61.6Q9.0 52.0 20.5 42.4Q16.8 27.9 31.8 26.9Q37.3 13.0 50.0 21.0Z" fill="url(#gIvory)" stroke="#D9B98A" stroke-width="2"/>'+HL(37,31,11,5,-25)+'<path d="M50 34l5.3 10.8 11.9 1.7-8.6 8.4 2 11.8L50 61.1l-10.6 5.6 2-11.8-8.6-8.4 11.9-1.7z" fill="#E0A93C" stroke="#A8782A" stroke-width="2" stroke-linejoin="round"/>'},
+ {name:"golden bow marshmallow", svg: SH+'<rect x="15" y="30" width="70" height="56" rx="20" fill="url(#gGold)" stroke="#B8862E" stroke-width="2"/>'+HL(33,43,11,5,-20)+'<rect x="45" y="30" width="10" height="56" fill="#F7A8C4" opacity=".9"/><path d="M50 33C38 16 21 20 27 31 31 38 43 37 50 33ZM50 33C62 16 79 20 73 31 69 38 57 37 50 33Z" fill="#D6243A" stroke="#8C1530" stroke-width="2.2" stroke-linejoin="round"/><circle cx="50" cy="33" r="5.5" fill="#E8485C" stroke="#8C1530" stroke-width="2"/>'}
+];
+const SVG = t => `<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">${TYPES[t].svg}</svg>`;
+
+/* ===== Board logic ===== */
+const N = 7, NT = TYPES.length, GOAL = 30;
+const board = $("board");
+let grid = [], busy = false, sel = null, moves = 0, got = 0, won = false, cur = {r:3,c:3}, hintTimer = null, uid = 0;
+const inB = (r,c) => r>=0 && r<N && c>=0 && c<N;
+
+function typesOf(g){ return g.map(row => row.map(p => p ? p.t : -1)); }
+function matchesIn(t){ // t: 2D type array; returns Set of "r,c"
+  const s = new Set();
+  for(let r=0;r<N;r++){ let run=1; for(let c=1;c<=N;c++){ if(c<N && t[r][c]>=0 && t[r][c]===t[r][c-1]) run++; else { if(run>=3) for(let k=c-run;k<c;k++) s.add(r+","+k); run=1; } } }
+  for(let c=0;c<N;c++){ let run=1; for(let r=1;r<=N;r++){ if(r<N && t[r][c]>=0 && t[r][c]===t[r-1][c]) run++; else { if(run>=3) for(let k=r-run;k<r;k++) s.add(k+","+c); run=1; } } }
+  return s;
+}
+function findMove(t){ // returns [[r,c],[r2,c2]] of a valid swap or null
+  const dirs=[[0,1],[1,0]];
+  const order = shuffle([...Array(N*N).keys()]);
+  for(const i of order){ const r=Math.floor(i/N), c=i%N;
+    for(const [dr,dc] of dirs){ const r2=r+dr, c2=c+dc; if(!inB(r2,c2) || t[r][c]===t[r2][c2]) continue;
+      [t[r][c],t[r2][c2]]=[t[r2][c2],t[r][c]]; const ok = matchesIn(t).size>0; [t[r][c],t[r2][c2]]=[t[r2][c2],t[r][c]];
+      if(ok) return [[r,c],[r2,c2]]; } }
+  return null;
+}
+function freshTypes(){ // random board with no starting matches and at least one move
+  for(let tries=0; tries<500; tries++){
+    const t = [];
+    for(let r=0;r<N;r++){ t.push([]); for(let c=0;c<N;c++){
+      let opts = [...Array(NT).keys()].filter(k => !(c>=2 && t[r][c-1]===k && t[r][c-2]===k) && !(r>=2 && t[r-1][c]===k && t[r-2][c]===k));
+      t[r].push(opts[randInt(opts.length)]); } }
+    if(matchesIn(t).size===0 && findMove(t)) return t;
+  }
+  throw new Error("could not build board");
+}
+function setPos(p, r, c){ p.el.style.transform = `translate(${c*100}%, ${r*100}%)`; }
+function makePiece(t, r, c){
+  const el = document.createElement("div"); el.className = "pc"; el.dataset.id = ++uid;
+  el.innerHTML = `<div class="in">${SVG(t)}</div>`;
+  const p = {t, el}; setPos(p, r, c); board.appendChild(el); return p;
+}
+function layoutAll(){ for(let r=0;r<N;r++) for(let c=0;c<N;c++) if(grid[r][c]) setPos(grid[r][c], r, c); }
+
+function newGame(){
+  hideCele(); clearTimeout(hintTimer);
+  board.querySelectorAll(".pc,.spark").forEach(e => e.remove());
+  const t = freshTypes();
+  grid = t.map((row,r) => row.map((k,c) => makePiece(k,r,c)));
+  busy=false; sel=null; moves=0; got=0; won=false; updateProgress(); armHint();
+  say(`New game. Make rows of three to collect ${GOAL} marshmallows.`);
+}
+function updateProgress(){ $("got").textContent = Math.min(got,GOAL); $("goalN").textContent = GOAL; $("goalTxt").textContent = GOAL; $("barFill").style.width = Math.min(100, got/GOAL*100) + "%"; }
+function say(t){ const l=$("live"); l.textContent=""; setTimeout(()=>{ l.textContent=t; },30); }
+function toast(t, ms){ const e=$("toast"); e.textContent=t; e.classList.add("on"); setTimeout(()=>e.classList.remove("on"), ms||1100); }
+
+function select(r,c){ clearSel(); sel={r,c}; grid[r][c].el.classList.add("sel"); }
+function clearSel(){ if(sel && grid[sel.r] && grid[sel.r][sel.c]) grid[sel.r][sel.c].el.classList.remove("sel"); sel=null; }
+
+async function trySwap(r1,c1,r2,c2){
+  if(busy || won || !inB(r2,c2) || Math.abs(r1-r2)+Math.abs(c1-c2)!==1) return;
+  busy = true; clearSel(); clearHint();
+  const a = grid[r1][c1], b = grid[r2][c2];
+  a.el.classList.add("swap"); b.el.classList.add("swap");
+  grid[r1][c1]=b; grid[r2][c2]=a; setPos(a,r2,c2); setPos(b,r1,c1);
+  await wait(190);
+  let m = matchesIn(typesOf(grid));
+  if(m.size===0){
+    grid[r1][c1]=a; grid[r2][c2]=b; setPos(a,r1,c1); setPos(b,r2,c2);
+    await wait(190);
+    a.el.classList.remove("swap"); b.el.classList.remove("swap");
+    a.el.classList.add("nope"); b.el.classList.add("nope"); setTimeout(()=>{a.el.classList.remove("nope"); b.el.classList.remove("nope");},320);
+    say("No match there. Try another swap.");
+    busy=false; armHint(); return;
+  }
+  a.el.classList.remove("swap"); b.el.classList.remove("swap");
+  moves++;
+  let combo = 0;
+  while(m.size){
+    combo++;
+    await popCells(m);
+    got += m.size; updateProgress();
+    say(`${m.size} marshmallows! ${Math.min(got,GOAL)} of ${GOAL}.`);
+    if(combo===2) toast("Sweet combo!"); else if(combo>=3) toast("Marshmallow magic!");
+    await dropAndFill();
+    m = matchesIn(typesOf(grid));
+  }
+  if(got >= GOAL){ won = true; busy = false; setTimeout(celebrate, reduce()?100:350); return; }
+  if(!findMove(typesOf(grid))){ await reshuffle(); }
+  busy = false; armHint();
+}
+async function popCells(m){
+  m.forEach(k => { const [r,c] = k.split(",").map(Number); const p = grid[r][c]; p.el.classList.add("pop"); sparks(r,c); });
+  await wait(240);
+  m.forEach(k => { const [r,c] = k.split(",").map(Number); grid[r][c].el.remove(); grid[r][c] = null; });
+}
+function sparks(r,c){
+  if(reduce()) return;
+  const w = board.clientWidth/N;
+  for(let i=0;i<4;i++){ const s=document.createElement("i"); s.className="spark"; const a=(i*Math.PI/2)+Math.PI/4;
+    s.style.left=(c*w+w/2)+"px"; s.style.top=(r*w+w/2)+"px"; s.style.setProperty("--dx",Math.round(Math.cos(a)*w*.55)+"px"); s.style.setProperty("--dy",Math.round(Math.sin(a)*w*.55)+"px");
+    if(i%2) s.style.background="#F7A8C4"; board.appendChild(s); setTimeout(()=>s.remove(),650); }
+}
+async function dropAndFill(){
+  for(let c=0;c<N;c++){
+    let write = N-1;
+    for(let r=N-1;r>=0;r--){ if(grid[r][c]){ if(write!==r){ grid[write][c]=grid[r][c]; grid[r][c]=null; setPos(grid[write][c],write,c); } write--; } }
+    const empties = write+1;
+    for(let r=write; r>=0; r--){
+      // choose a type for the new piece (random)
+      const p = makePiece(randInt(NT), r-empties, c);
+      grid[r][c] = p;
+    }
+  }
+  void board.offsetWidth; // let new pieces render above the board before falling
+  layoutAll();
+  await wait(270);
+}
+async function reshuffle(){
+  toast("No moves left - mixing!", 1300); say("No moves left. Mixing the marshmallows.");
+  const flat = []; for(let r=0;r<N;r++) for(let c=0;c<N;c++) flat.push(grid[r][c].t);
+  let t = null;
+  for(let i=0;i<300 && !t;i++){ shuffle(flat); const cand=[]; for(let r=0;r<N;r++) cand.push(flat.slice(r*N,r*N+N)); if(matchesIn(cand).size===0 && findMove(cand)) t=cand; }
+  if(!t) t = freshTypes();
+  await wait(450);
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++){ const p=grid[r][c]; if(p.t!==t[r][c]){ p.t=t[r][c]; p.el.querySelector(".in").innerHTML = SVG(p.t); } p.el.classList.add("pop"); }
+  await wait(120);
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++) grid[r][c].el.classList.remove("pop");
+  await wait(250);
+}
+
+/* ===== Hints for little players ===== */
+function clearHint(){ board.querySelectorAll(".pc.hint").forEach(e=>e.classList.remove("hint")); }
+function armHint(){ clearTimeout(hintTimer); hintTimer = setTimeout(()=>{ if(busy||won) return; const mv=findMove(typesOf(grid)); if(mv){ mv.forEach(([r,c])=>grid[r][c].el.classList.add("hint")); setTimeout(clearHint, 2200); } }, 9000); }
+
+/* ===== Pointer input: tap two neighbours, or slide ===== */
+let drag = null;
+function cellAt(e){ const r=board.getBoundingClientRect(); const c=Math.floor((e.clientX-r.left)/r.width*N), rr=Math.floor((e.clientY-r.top)/r.height*N); return inB(rr,c)?{r:rr,c}:null; }
+board.addEventListener("pointerdown", e => {
+  if(busy || won) return; const cell = cellAt(e); if(!cell) return;
+  e.preventDefault(); board.setPointerCapture && board.setPointerCapture(e.pointerId);
+  drag = {start:cell, x:e.clientX, y:e.clientY, moved:false};
+});
+board.addEventListener("pointermove", e => {
+  if(!drag || drag.moved) return;
+  const dx=e.clientX-drag.x, dy=e.clientY-drag.y, th=board.clientWidth/N*0.35;
+  if(Math.max(Math.abs(dx),Math.abs(dy)) < th) return;
+  drag.moved = true; const {r,c} = drag.start;
+  if(Math.abs(dx)>Math.abs(dy)) trySwap(r,c,r,c+(dx>0?1:-1)); else trySwap(r,c,r+(dy>0?1:-1),c);
+});
+board.addEventListener("pointerup", e => {
+  if(!drag) return; const d = drag; drag = null; if(d.moved || busy || won) return;
+  const {r,c} = d.start;
+  if(sel){ if(sel.r===r && sel.c===c){ clearSel(); return; } if(Math.abs(sel.r-r)+Math.abs(sel.c-c)===1){ trySwap(sel.r,sel.c,r,c); return; } }
+  select(r,c); armHint();
+});
+board.addEventListener("pointercancel", () => { drag = null; });
+board.addEventListener("touchmove", e => e.preventDefault(), {passive:false});
+
+/* ===== Keyboard ===== */
+function moveCursor(){ $("cursor").style.transform = `translate(${cur.c*100}%, ${cur.r*100}%)`; }
+board.addEventListener("keydown", e => {
+  const D = {ArrowUp:[-1,0],ArrowDown:[1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]}[e.key];
+  if(D){ e.preventDefault();
+    if(sel){ const s = sel; if(!inB(s.r+D[0],s.c+D[1])) return; trySwap(s.r,s.c,s.r+D[0],s.c+D[1]); }
+    cur = {r:Math.max(0,Math.min(N-1,cur.r+D[0])), c:Math.max(0,Math.min(N-1,cur.c+D[1]))};
+    moveCursor(); return; }
+  if(e.key==="Enter" || e.key===" "){ e.preventDefault(); if(busy||won) return;
+    if(sel && sel.r===cur.r && sel.c===cur.c){ clearSel(); say("Put down."); }
+    else { select(cur.r,cur.c); say(`Picked up a ${TYPES[grid[cur.r][cur.c].t].name}. Press an arrow key to swap.`); } }
+  if(e.key==="Escape") clearSel();
+});
+board.addEventListener("focus", moveCursor);
+
+/* ===== Celebration ===== */
+function bestMoves(){ try{ return JSON.parse(localStorage.getItem(BEST_KEY)||"null"); }catch(e){ return null; } }
+function celebrate(){
+  clearTimeout(hintTimer);
+  const prev = bestMoves();
+  $("celeTitle").textContent = ["Sweet work!","Marshmallow marvellous!","Hooray!","Jar filled!"][randInt(4)];
+  $("celeMsg").textContent = `You collected ${GOAL} marshmallows in ${moves} swaps. Pip is cheering for you!`;
+  let b = "";
+  if(prev===null || moves < prev){ try{ localStorage.setItem(BEST_KEY, JSON.stringify(moves)); }catch(e){} if(prev!==null) b = "That's your best game yet!"; }
+  else b = `Your best game: ${prev} swaps.`;
+  $("celeBest").textContent = b;
+  $("cele").classList.add("on"); $("celeAgain").focus();
+  say(`You did it! ${GOAL} marshmallows collected in ${moves} swaps.`);
+  confetti();
+}
+function hideCele(){ $("cele").classList.remove("on"); }
+function confetti(){
+  if(reduce()) return;
+  const cv=$("confetti"), x=cv.getContext("2d"), dpr=Math.min(devicePixelRatio||1,2);
+  cv.width=innerWidth*dpr; cv.height=innerHeight*dpr; x.setTransform(dpr,0,0,dpr,0,0);
+  const cols=["#D6243A","#5FD6B3","#F7A8C4","#D9A94A","#FFFFFF","#8C1530"];
+  const ps=Array.from({length:120},()=>({x:Math.random()*innerWidth,y:-20-Math.random()*innerHeight*.5,vx:(Math.random()-.5)*2,vy:2+Math.random()*3,r:Math.random()*3,vr:(Math.random()-.5)*.2,w:6+Math.random()*6,h:8+Math.random()*8,c:cols[randInt(cols.length)]}));
+  const t0=performance.now();
+  (function tick(t){ x.clearRect(0,0,innerWidth,innerHeight);
+    ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.vy+=.03;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore();});
+    if(t-t0<3400) requestAnimationFrame(tick); else x.clearRect(0,0,innerWidth,innerHeight); })(t0);
+}
+$("againBtn").onclick = newGame;
+$("celeAgain").onclick = () => { newGame(); board.focus({preventScroll:true}); };
+$("cele").addEventListener("keydown", e => { if(e.key==="Escape") hideCele(); });
+
+/* Test hooks (read-only helpers used by automated checks) */
+window.__mm = {
+  types: () => typesOf(grid), matches: () => matchesIn(typesOf(grid)).size, hasMove: () => !!findMove(typesOf(grid)),
+  move: () => findMove(typesOf(grid)), state: () => ({busy, got, moves, won, goal:GOAL}),
+  swap: (a,b,c,d) => trySwap(a,b,c,d),
+  forceNoMoves: async () => { // test only: paint a stuck pattern then run the reshuffle path
+    const pat=[[0,1,2,3,4],[2,3,4,0,1],[4,0,1,2,3],[1,2,3,4,0],[3,4,0,1,2]];
+    for(let r=0;r<N;r++) for(let c=0;c<N;c++){ const p=grid[r][c]; p.t=pat[r%5][c%5]; p.el.querySelector(".in").innerHTML=SVG(p.t); }
+    const stuck = !findMove(typesOf(grid)) && matchesIn(typesOf(grid)).size===0;
+    busy = true; await reshuffle(); busy = false; return stuck;
+  }
+};
+newGame();
+})();
+</script>
+</body>
+</html>
