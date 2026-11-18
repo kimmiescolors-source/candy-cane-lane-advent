@@ -291,7 +291,7 @@ label.name{display:block;font-size:15px;color:var(--cran);margin:6px 0}
   <!-- Captain Percival Pinewhistle (approved character art) -->
   <ellipse cx="860" cy="612" rx="74" ry="11" fill="#9E6440" opacity=".35"/>
   <image id="capImg" href="assets/captain.webp" x="792" y="118" width="138" height="495" preserveAspectRatio="xMidYMid meet" style="transform-box:fill-box;transform-origin:50% 100%"/>
-  <g id="fx"></g>
+  <g id="fx" pointer-events="none"></g>
 </svg>
   </div>
 
@@ -515,17 +515,17 @@ const TOYS = {
       <rect x="54" y="316" width="300" height="22" rx="6" fill="#6B3A2E" ${O}/>
       ${P("body","engine body","M164 232 H316 Q338 232 338 254 V318 H164 Z")}
       ${P("body","engine body","M72 178 H180 V318 H72 Z")}
-      <rect x="92" y="200" width="66" height="54" rx="10" fill="#FFF1C2" ${O}/><path d="M125 200 V254 M92 227 H158" stroke="#E6B488" stroke-width="3"/>
+      <rect class="np" x="92" y="200" width="66" height="54" rx="10" fill="#FFF1C2" ${O}/><path d="M125 200 V254 M92 227 H158" stroke="#E6B488" stroke-width="3"/>
       ${P("trim","roof, chimney and trim","M56 152 Q126 132 196 152 L196 178 L56 178 Z")}
       ${P("trim","roof, chimney and trim","M286 232 V182 H318 V232 Z M278 166 H326 L318 186 H286 Z")}
       ${P("trim","roof, chimney and trim","M206 232 H222 V318 H206 Z M262 232 H278 V318 H262 Z")}
       ${P("trim","roof, chimney and trim","M338 300 L376 336 H338 Z")}
-      <circle cx="342" cy="262" r="12" fill="#FFE07A" ${O}/>
+      <circle class="np" cx="342" cy="262" r="12" fill="#FFE07A" ${O}/>
       ${P("wheels","wheels","M80 352 a44 44 0 1 0 88 0 a44 44 0 1 0 -88 0 Z")}
       ${P("wheels","wheels","M186 352 a44 44 0 1 0 88 0 a44 44 0 1 0 -88 0 Z")}
       ${P("wheels","wheels","M282 362 a30 30 0 1 0 60 0 a30 30 0 1 0 -60 0 Z")}
       <g stroke="#5A2A2A" stroke-width="3" opacity=".55"><path d="M124 314 V390 M86 352 H162 M230 314 V390 M192 352 H268 M312 334 V390 M284 362 H340"/></g>
-      <circle cx="124" cy="352" r="12" fill="#E2B04E" ${O}/><circle cx="230" cy="352" r="12" fill="#E2B04E" ${O}/><circle cx="312" cy="362" r="9" fill="#E2B04E" ${O}/>
+      <circle class="np" cx="124" cy="352" r="12" fill="#E2B04E" ${O}/><circle class="np" cx="230" cy="352" r="12" fill="#E2B04E" ${O}/><circle class="np" cx="312" cy="362" r="9" fill="#E2B04E" ${O}/>
       <path d="M124 352 L230 352" stroke="#6B3A2E" stroke-width="8" stroke-linecap="round"/>` },
   soldier: { name:"Wooden Soldier", defaults:{jacket:"#5FD6B3", hat:"#B3122E", trousers:"#FFF3DE", extras:"#E2B04E"},
     slots:[[200,214,32],[168,246,26],[232,246,26],[200,78,30],[180,336,24],[220,336,24]],
@@ -539,7 +539,7 @@ const TOYS = {
       <circle cx="134" cy="296" r="13" fill="#F6D9B8" ${O}/><circle cx="266" cy="296" r="13" fill="#F6D9B8" ${O}/>
       ${P("extras","belt and shoulders","M142 262 H258 V280 H142 Z")}
       ${P("extras","belt and shoulders","M128 178 Q150 166 170 180 Q150 196 128 190 Z M272 178 Q250 166 230 180 Q250 196 272 190 Z")}
-      <rect x="190" y="261" width="20" height="20" rx="3" fill="#FFF3C4" stroke="#A9772A" stroke-width="2.5"/>
+      <rect class="np" x="190" y="261" width="20" height="20" rx="3" fill="#FFF3C4" stroke="#A9772A" stroke-width="2.5"/>
       <g fill="#E2B04E" stroke="#A9772A" stroke-width="1.5"><circle cx="200" cy="198" r="4.5"/><circle cx="200" cy="226" r="4.5"/><circle cx="200" cy="248" r="4.5"/></g>
       <circle cx="200" cy="140" r="36" fill="#F6D9B8" ${O}/>
       <circle cx="186" cy="136" r="4.5" fill="#2A1A14"/><circle cx="214" cy="136" r="4.5" fill="#2A1A14"/>
@@ -569,6 +569,8 @@ ORDER.forEach(k => {
   b.onclick = () => chooseToy(k); $("toyCards").appendChild(b);
 });
 const NOPAINT = ["#2a1a14","#4a2a20","#5a2a2a","#6b3a2e","#3e2a2a"];
+// Pieces that belong together and are painted as one (e.g. the whole train body).
+const GROUPS = {teddy:["scarf"], horse:[], train:["body"], soldier:["jacket"]};
 function mountToy(){
   const t = TOYS[S.toy], k = SCALE[S.toy]; $("toyHolder").setAttribute("transform", `translate(490 470) scale(${k}) translate(-200 -400)`); toyG.innerHTML = t.svg();
   paintAll(toyG, t.defaults);
@@ -576,10 +578,10 @@ function mountToy(){
   let n = 0;
   toyG.querySelectorAll("path,ellipse,circle,rect").forEach(e => {
     const f = (e.getAttribute("fill")||"").toLowerCase();
-    let ok = f && f!=="none" && !f.startsWith("url") && !e.hasAttribute("opacity") && !NOPAINT.includes(f);
+    let ok = f && f!=="none" && !f.startsWith("url") && !e.hasAttribute("opacity") && !NOPAINT.includes(f) && !e.classList.contains("np");
     if(ok){ const b = e.getBBox(); ok = b.width*b.height >= 200; }
     if(!ok){ e.classList.remove("part"); e.setAttribute("pointer-events","none"); return; }
-    const i = n++; e.classList.add("part"); e.dataset.i = i; if(!(i in S.base)) S.base[i] = e.getAttribute("fill");
+    const i = n++; e.classList.add("part"); e.dataset.i = i; if(GROUPS[S.toy].includes(e.dataset.part)) e.dataset.g = e.dataset.part; if(!(i in S.base)) S.base[i] = e.getAttribute("fill");
     if(S.colours[i]) e.setAttribute("fill", S.colours[i]);
     e.setAttribute("tabindex","0"); e.setAttribute("role","button"); e.setAttribute("aria-label","Colour this part of the " + t.name.toLowerCase());
     e.addEventListener("click", () => paintPart(i));
@@ -613,8 +615,11 @@ function cheer(){ S.actions++; if(S.actions % 4 === 0) talk(CHEERS[(S.actions/4 
 function paintPart(i){
   if(S.step!==2 || !S.brush) return;
   const p = toyG.querySelector(`.part[data-i="${i}"]`); if(!p) return;
-  const cur = S.colours[i] || S.base[i]; if(cur === S.brush) return;
-  S.hist.push({type:"colour", i, prev:S.colours[i]}); S.colours[i] = S.brush; p.setAttribute("fill", S.brush);
+  const group = p.dataset.g ? [...toyG.querySelectorAll(`.part[data-g="${p.dataset.g}"]`)] : [p];
+  const ids = group.map(q => q.dataset.i);
+  if(ids.every(j => (S.colours[j] || S.base[j]) === S.brush)) return;
+  S.hist.push({type:"colour", items: ids.map(j => [j, S.colours[j]])});
+  group.forEach(q => { S.colours[q.dataset.i] = S.brush; q.setAttribute("fill", S.brush); });
   const bb = p.getBBox(); sparkle(...toStage(bb.x+bb.width/2, bb.y+bb.height/2), 6);
   toyG.querySelectorAll(".part").forEach(q => q.classList.remove("hint"));
   refreshDecoUI(); cheer();
@@ -631,7 +636,7 @@ function addDeco(id){
 }
 function undo(){
   const h = S.hist.pop(); if(!h) return;
-  if(h.type==="colour"){ if(h.prev) S.colours[h.i] = h.prev; else delete S.colours[h.i]; const p = toyG.querySelector(`.part[data-i="${h.i}"]`); if(p) p.setAttribute("fill", S.colours[h.i] || S.base[h.i]); }
+  if(h.type==="colour"){ h.items.forEach(([j,prev]) => { if(prev) S.colours[j] = prev; else delete S.colours[j]; const p = toyG.querySelector(`.part[data-i="${j}"]`); if(p) p.setAttribute("fill", S.colours[j] || S.base[j]); }); }
   else { S.decos = S.decos.filter(x => x!==h.d); const n = toyG.querySelector(`.deco[data-slot="${h.d.slot}"]`); if(n) n.remove(); if(h.replaced){ S.decos.unshift(h.replaced); drawDeco(h.replaced); } }
   refreshDecoUI();
 }
