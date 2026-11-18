@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>Day 9 · Peppermint Pairs · Candy Cane Lane</title>
+<title>Day 12 · Peppermint Pairs · Candy Cane Lane</title>
 <style>
 :root{
   --cran:#8C1530; --red:#D6243A; --mint:#5FD6B3; --mintsoft:#DDF6EC; --mintdeep:#2E9C7E;
@@ -92,7 +92,7 @@ h1 small{display:block;font-size:13px;letter-spacing:.14em;text-transform:upperc
 <div class="stripe"></div>
 <header>
   <button class="back" id="backBtn" aria-label="Back to the Sweet Shop">&#8592; <span>Back to the Sweet Shop</span></button>
-  <h1><small>Day 9 &middot; Candy Cane Lane</small>Peppermint Pairs</h1>
+  <h1><small>Day 12 &middot; Candy Cane Lane</small>Peppermint Pairs</h1>
   <div class="spacer"></div>
 </header>
 <div class="controls">
@@ -374,7 +374,7 @@ $("celeAgain").onclick = ()=>{ newGame(); board.firstChild && board.firstChild.f
 $("celeNext").onclick = ()=>{ const nx=LEVELS[level].next; if(nx){ setLevel(nx); board.firstChild && board.firstChild.focus(); } };
 $("cele").addEventListener("keydown", e=>{ if(e.key==="Escape") hideCele(); });
 $("backBtn").onclick = () => {
-  if(RETURN_URL){ location.assign(RETURN_URL); return; }
+  if((window.opener||document.referrer)&&history.length<=1){ try{ window.close(); }catch(e){} setTimeout(function(){ if(RETURN_URL){ window.location.assign(RETURN_URL); } else { $("backModal").classList.add("on"); } },400); return; } if(RETURN_URL){ location.assign(RETURN_URL); return; }
   if(window.opener){ try{ window.close(); }catch(e){} }
   $("backModal").classList.add("on");
 };

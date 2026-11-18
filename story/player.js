@@ -128,7 +128,7 @@ function init(){
 
   $("backBtn").addEventListener("click", function(){
     try{ audio.pause(); }catch(e){}
-    if(RETURN_URL){ window.location.assign(RETURN_URL); return; }
+    if((window.opener||document.referrer)&&history.length<=1){ try{ window.close(); }catch(e){} setTimeout(function(){ if(RETURN_URL){ window.location.assign(RETURN_URL); } else { $("backModal").classList.add("on"); } },400); return; } if(RETURN_URL){ window.location.assign(RETURN_URL); return; }
     if(window.opener){ try{ window.close(); }catch(e){} }
     $("backModal").classList.add("on");
   });

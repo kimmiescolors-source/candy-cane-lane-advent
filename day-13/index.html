@@ -508,7 +508,7 @@ $("saveBtn").onclick=async()=>{
 /* ===== Name, back button, start ===== */
 try{$("baker").value=localStorage.getItem("candycanelane-child-name")||"";}catch(e){}
 $("baker").addEventListener("input",()=>{try{localStorage.setItem("candycanelane-child-name",$("baker").value);}catch(e){}});
-$("backBtn").onclick=()=>{ save(); if(RETURN_URL){location.assign(RETURN_URL);return;} if(window.opener){try{window.close();}catch(e){}} $("backModal").classList.add("on"); };
+$("backBtn").onclick=()=>{ save(); if((window.opener||document.referrer)&&history.length<=1){ try{ window.close(); }catch(e){} setTimeout(function(){ if(RETURN_URL){ window.location.assign(RETURN_URL); } else { $("backModal").classList.add("on"); } },400); return; } if(RETURN_URL){location.assign(RETURN_URL);return;} if(window.opener){try{window.close();}catch(e){}} $("backModal").classList.add("on"); };
 $("backOk").onclick=()=>$("backModal").classList.remove("on");
 buildOpts(); render(); tip(state.shape||"start");
 })();

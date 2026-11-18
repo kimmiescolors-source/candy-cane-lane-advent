@@ -182,7 +182,7 @@ $("saveName").onclick=()=>{ childName=cleanName($("nameIn").value); store.set(NA
 $("skip").onclick=()=>{ store.set(ASKED_KEY,"1"); $("nameSheet").classList.remove("on"); };
 $("nameIn").addEventListener("keydown",e=>{ if(e.key==="Enter") $("saveName").click(); });
 $("editName").onclick=showNameSheet;
-function goBack(){ if(RETURN_URL){ location.assign(RETURN_URL); return; } if(window.opener){try{window.close();}catch(e){}} $("backModal").classList.add("on"); }
+function goBack(){ if((window.opener||document.referrer)&&history.length<=1){ try{ window.close(); }catch(e){} setTimeout(function(){ if(RETURN_URL){ window.location.assign(RETURN_URL); } else { $("backModal").classList.add("on"); } },400); return; } if(RETURN_URL){ location.assign(RETURN_URL); return; } if(window.opener){try{window.close();}catch(e){}} $("backModal").classList.add("on"); }
 $("backBtn").onclick=goBack; $("backBtn2").onclick=goBack; $("backOk").onclick=()=>$("backModal").classList.remove("on");
 // sparkles
 [[18,40],[82,44],[30,62],[72,66],[50,58],[12,78],[88,80]].forEach(([x,y],i)=>{ const s=document.createElement("span"); s.className="spark"; s.style.left=x+"%"; s.style.top=y+"%"; s.style.animationDelay=(i*.27)+"s"; $("stage").appendChild(s); });
