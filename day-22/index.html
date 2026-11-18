@@ -309,7 +309,7 @@ label.name{display:block;font-size:15px;color:var(--cran);margin:6px 0}
   <!-- Step 2 -->
   <section class="panel" id="p2" hidden>
     <h2>Decorate your toy</h2>
-    <p class="how" id="howPaint">Tap a colour, then tap part of your toy. Tap a decoration to add it.</p>
+    <p class="how" id="howPaint">Tap any part of your toy to paint it. Pick a colour below, and tap a decoration to add it.</p>
     <div class="row swRow" id="swatches"><div class="label">Colours</div></div>
     <div class="row" id="decos"><div class="label">Decorations</div></div>
     <div class="acts">
@@ -555,7 +555,7 @@ const SCALE = {teddy:1.08, horse:1.12, train:1.1, soldier:1.14};
 const toStage = (x,y) => { const k = SCALE[S.toy]||1; return [490+(x-200)*k, 470+(y-400)*k]; };
 
 /* ===== State ===== */
-const S = {step:1, toy:null, colours:{}, decos:[], hist:[], brush:null, paper:null, ribbon:null, busy:false, actions:0};
+const S = {step:1, toy:null, colours:{}, base:{}, decos:[], hist:[], brush:null, paper:null, ribbon:null, busy:false, actions:0};
 const toyG = $("toy");
 function setStep(n){ S.step = n; ["p1","p2","p3","p4"].forEach((id,i)=> $(id).hidden = (i+1)!==n); document.querySelectorAll("#steps li").forEach(li => { const s=+li.dataset.s; li.className = s<n?"done":s===n?"now":""; }); }
 function addShades(root){ root.querySelectorAll(".part").forEach(p => { const s = p.cloneNode(); s.removeAttribute("class"); s.removeAttribute("data-part"); s.setAttribute("fill","url(#gShade)"); s.setAttribute("stroke","none"); s.setAttribute("pointer-events","none"); p.after(s); }); }
@@ -568,15 +568,30 @@ ORDER.forEach(k => {
   const svg = b.querySelector("svg"); addShades(svg); paintAll(svg, t.defaults);
   b.onclick = () => chooseToy(k); $("toyCards").appendChild(b);
 });
+const NOPAINT = ["#2a1a14","#4a2a20","#5a2a2a","#6b3a2e","#3e2a2a"];
 function mountToy(){
-  const t = TOYS[S.toy], k = SCALE[S.toy]; $("toyHolder").setAttribute("transform", `translate(490 470) scale(${k}) translate(-200 -400)`); toyG.innerHTML = t.svg(); addShades(toyG); paintAll(toyG, S.colours);
-  toyG.querySelectorAll(".part").forEach(p => { p.setAttribute("tabindex","0"); p.setAttribute("role","button"); p.setAttribute("aria-label","Colour the " + p.dataset.label);
-    p.addEventListener("click", () => paintPart(p.dataset.part));
-    p.addEventListener("keydown", e => { if(e.key==="Enter"||e.key===" "){ e.preventDefault(); paintPart(p.dataset.part); } }); });
+  const t = TOYS[S.toy], k = SCALE[S.toy]; $("toyHolder").setAttribute("transform", `translate(490 470) scale(${k}) translate(-200 -400)`); toyG.innerHTML = t.svg();
+  paintAll(toyG, t.defaults);
+  // Every sizeable shape of the toy becomes its own paintable piece; small details let taps fall through.
+  let n = 0;
+  toyG.querySelectorAll("path,ellipse,circle,rect").forEach(e => {
+    const f = (e.getAttribute("fill")||"").toLowerCase();
+    let ok = f && f!=="none" && !f.startsWith("url") && !e.hasAttribute("opacity") && !NOPAINT.includes(f);
+    if(ok){ const b = e.getBBox(); ok = b.width*b.height >= 200; }
+    if(!ok){ e.classList.remove("part"); e.setAttribute("pointer-events","none"); return; }
+    const i = n++; e.classList.add("part"); e.dataset.i = i; if(!(i in S.base)) S.base[i] = e.getAttribute("fill");
+    if(S.colours[i]) e.setAttribute("fill", S.colours[i]);
+    e.setAttribute("tabindex","0"); e.setAttribute("role","button"); e.setAttribute("aria-label","Colour this part of the " + t.name.toLowerCase());
+    e.addEventListener("click", () => paintPart(i));
+    e.addEventListener("keydown", ev => { if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); paintPart(i); } });
+  });
+  toyG.querySelectorAll(".part").forEach(p => { const sh = p.cloneNode(); sh.removeAttribute("class"); sh.removeAttribute("tabindex"); sh.removeAttribute("role"); sh.removeAttribute("aria-label"); sh.removeAttribute("data-i"); sh.setAttribute("fill","url(#gShade)"); sh.setAttribute("stroke","none"); sh.setAttribute("pointer-events","none"); p.after(sh); });
+  if(S.brush) toyG.querySelectorAll(".part").forEach(p => p.classList.add("hint"));
   S.decos.forEach(d => drawDeco(d));
 }
 function chooseToy(k){
-  S.toy = k; S.colours = {...TOYS[k].defaults}; S.decos = []; S.hist = []; S.actions = 0; S.brush = null;
+  S.toy = k; S.colours = {}; S.base = {}; S.decos = []; S.hist = []; S.actions = 0;
+  selectBrush(0);
   mountToy(); $("toy").classList.remove("pop"); void $("toy").getBBox(); $("toy").classList.add("pop"); sparkle(490,250,14);
   talk("An excellent choice! Let’s make it extra special!");
   setStep(2); refreshDecoUI();
@@ -584,16 +599,23 @@ function chooseToy(k){
 
 /* Step 2: colours and decorations */
 COLOURS.forEach(([name,hex,short]) => { const b = document.createElement("button"); b.className = "sw"; b.style.background = hex; b.setAttribute("aria-pressed","false"); b.setAttribute("aria-label", name); b.innerHTML = `<span>${short}</span>`;
-  b.onclick = () => { S.brush = hex; document.querySelectorAll(".sw").forEach(s => s.setAttribute("aria-pressed", s===b ? "true":"false")); $("scene").classList.add("painting"); toyG.querySelectorAll(".part").forEach(p => p.classList.add("hint")); $("howPaint").textContent = "Now tap part of your toy to paint it " + name.toLowerCase() + "!"; };
+  b.onclick = () => selectBrush(COLOURS.findIndex(c => c[1]===hex));
   $("swatches").appendChild(b); });
+function selectBrush(idx){
+  const [name,hex] = COLOURS[idx]; S.brush = hex;
+  document.querySelectorAll(".sw").forEach((s,i) => s.setAttribute("aria-pressed", i===idx ? "true":"false"));
+  $("scene").classList.add("painting");
+  $("howPaint").textContent = `Painting with ${name.toLowerCase()} – tap any part of your toy! Tap a decoration to add it.`;
+}
 DECOS.forEach(([id,name]) => { const b = document.createElement("button"); b.className = "dec"; b.setAttribute("aria-label","Add a " + name.toLowerCase()); b.innerHTML = `<svg viewBox="0 0 50 50" aria-hidden="true"><use href="#${id}" width="50" height="50"/></svg>`; b.onclick = () => addDeco(id); $("decos").appendChild(b); });
 const CHEERS = ["Splendid decorating!","That looks wonderfully festive!","Santa will be delighted!"];
 function cheer(){ S.actions++; if(S.actions % 4 === 0) talk(CHEERS[(S.actions/4 - 1) % CHEERS.length]); }
-function paintPart(part){
-  if(S.step!==2 || !S.brush) { if(S.step===2 && !S.brush) $("howPaint").textContent = "First tap a colour below, then tap your toy!"; return; }
-  if(S.colours[part] === S.brush) return;
-  S.hist.push({type:"colour", part, prev:S.colours[part]}); S.colours[part] = S.brush; paintAll(toyG, S.colours);
-  const p = toyG.querySelector(`.part[data-part="${part}"]`), bb = p.getBBox(); sparkle(...toStage(bb.x+bb.width/2, bb.y+bb.height/2), 6);
+function paintPart(i){
+  if(S.step!==2 || !S.brush) return;
+  const p = toyG.querySelector(`.part[data-i="${i}"]`); if(!p) return;
+  const cur = S.colours[i] || S.base[i]; if(cur === S.brush) return;
+  S.hist.push({type:"colour", i, prev:S.colours[i]}); S.colours[i] = S.brush; p.setAttribute("fill", S.brush);
+  const bb = p.getBBox(); sparkle(...toStage(bb.x+bb.width/2, bb.y+bb.height/2), 6);
   toyG.querySelectorAll(".part").forEach(q => q.classList.remove("hint"));
   refreshDecoUI(); cheer();
 }
@@ -609,13 +631,13 @@ function addDeco(id){
 }
 function undo(){
   const h = S.hist.pop(); if(!h) return;
-  if(h.type==="colour"){ S.colours[h.part] = h.prev; paintAll(toyG, S.colours); }
+  if(h.type==="colour"){ if(h.prev) S.colours[h.i] = h.prev; else delete S.colours[h.i]; const p = toyG.querySelector(`.part[data-i="${h.i}"]`); if(p) p.setAttribute("fill", S.colours[h.i] || S.base[h.i]); }
   else { S.decos = S.decos.filter(x => x!==h.d); const n = toyG.querySelector(`.deco[data-slot="${h.d.slot}"]`); if(n) n.remove(); if(h.replaced){ S.decos.unshift(h.replaced); drawDeco(h.replaced); } }
   refreshDecoUI();
 }
 function refreshDecoUI(){ $("undoBtn").disabled = !S.hist.length; }
 $("undoBtn").onclick = undo;
-$("clearBtn").onclick = () => { S.colours = {...TOYS[S.toy].defaults}; S.decos = []; S.hist = []; mountToy(); refreshDecoUI(); talk("A fresh start! Let’s decorate it again."); };
+$("clearBtn").onclick = () => { S.colours = {}; S.decos = []; S.hist = []; mountToy(); refreshDecoUI(); talk("A fresh start! Let’s decorate it again."); };
 $("changeBtn").onclick = () => { resetAll(); talk("Which toy shall we finish next?"); };
 
 /* Step 3: wrapping */
@@ -626,8 +648,8 @@ PAPERS.forEach(([id,name]) => { const b = document.createElement("button"); b.cl
 RIBBONS.forEach(([name,fill,edge]) => { const b = document.createElement("button"); b.className = "rib"; b.setAttribute("aria-pressed","false"); b.setAttribute("aria-label", name + " ribbon");
   b.innerHTML = `<svg viewBox="-25 -25 50 50" aria-hidden="true"><path d="M0 0 C-8 -14 -24 -14 -22 -2 C-21 8 -8 6 0 0 Z M0 0 C8 -14 24 -14 22 -2 C21 8 8 6 0 0 Z M-2 2 L-10 20 L-4 18 L0 22 L2 4 Z M2 2 L10 20 L4 18 L0 22 Z" fill="${fill}" stroke="${edge}" stroke-width="2"/><circle r="5" fill="${fill}" stroke="${edge}" stroke-width="2"/></svg><span>${name}</span>`;
   b.onclick = () => chooseRibbon(fill, edge, b); $("ribbonsRow").appendChild(b); });
-$("wrapBtn").onclick = () => { S.brush = null; document.querySelectorAll(".sw").forEach(s=>s.setAttribute("aria-pressed","false")); $("scene").classList.remove("painting"); setStep(3); talk("Now for the wrapping! Which paper do you like best?"); };
-$("backToDeco").onclick = () => { unwrap(); setStep(2); talk("Of course! Let’s add a little more magic."); };
+$("wrapBtn").onclick = () => { S.lastBrush = S.brush; S.brush = null; document.querySelectorAll(".sw").forEach(s=>s.setAttribute("aria-pressed","false")); $("scene").classList.remove("painting"); setStep(3); talk("Now for the wrapping! Which paper do you like best?"); };
+$("backToDeco").onclick = () => { unwrap(); setStep(2); selectBrush(Math.max(0, COLOURS.findIndex(c => c[1]===S.lastBrush))); talk("Of course! Let’s add a little more magic."); };
 async function choosePaper(id, btn){
   if(S.busy) return;
   document.querySelectorAll(".paper").forEach(p => p.setAttribute("aria-pressed", p===btn ? "true":"false"));
