@@ -112,6 +112,8 @@ label.name{display:block;font-size:14px;color:var(--cran);margin:4px 0}
         <pattern id="pCaneM" width="24" height="24" patternUnits="userSpaceOnUse" patternTransform="rotate(-40)"><rect width="24" height="24" fill="#FFF8EC"/><rect width="10" height="24" fill="#3FB894"/></pattern>
         <pattern id="pKnit" width="14" height="12" patternUnits="userSpaceOnUse"><rect width="14" height="12" fill="#5FD6B3"/><path d="M0 0 L7 8 L14 0 M0 6 L7 14 L14 6" stroke="#46C29E" stroke-width="2" fill="none"/></pattern>
         <pattern id="pDots" width="20" height="20" patternUnits="userSpaceOnUse"><rect width="20" height="20" fill="#F59AC0"/><circle cx="5" cy="5" r="3" fill="#FFF8EC"/><circle cx="15" cy="15" r="3" fill="#FFF8EC"/></pattern>
+        <linearGradient id="gFold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#3A1A2A" stop-opacity=".28"/></linearGradient>
+        <linearGradient id="gFoldV" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3A1A2A" stop-opacity=".22"/><stop offset=".35" stop-color="#fff" stop-opacity=".14"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#3A1A2A" stop-opacity=".3"/></linearGradient>
         <filter id="fSoft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8"/></filter>
         <filter id="fShadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#4A2860" flood-opacity=".3"/></filter>
         <symbol id="tw" viewBox="-10 -10 20 20"><path d="M0 -10 C1 -3 3 -1 10 0 C3 1 1 3 0 10 C-1 3 -3 1 -10 0 C-3 -1 -1 -3 0 -10 Z" fill="#FFF3C4"/></symbol>
@@ -231,18 +233,18 @@ const HEAD={cx:500,cy:236,r:80}, MID={cx:500,cy:378,rx:114,ry:98}, BASE={cx:500,
 const PARTS = {
  hat: {label:"Hat", opts:[
   ["Top hat", () => `<g filter="url(#fShadow)"><ellipse cx="500" cy="176" rx="92" ry="17" fill="#1E1424"/><path d="M438 176 L444 74 Q500 62 556 74 L562 176 Z" fill="url(#gBlack)"/><ellipse cx="500" cy="74" rx="56" ry="11" fill="#3A2A42"/><rect x="440" y="140" width="120" height="22" fill="url(#gPink)"/><path d="M528 140 c14 -18 34 -8 26 6 c-6 10 -20 6 -26 -6 z M528 162 c14 18 34 8 26 -6" fill="url(#gPink)" stroke="#C4477A" stroke-width="1.5"/><path d="M450 86 q4 40 0 80" stroke="#fff" stroke-width="5" opacity=".18" fill="none"/></g>`],
-  ["Santa hat", () => `<g filter="url(#fShadow)"><path d="M420 178 C 430 110 480 70 540 78 C 600 86 640 120 646 168 L 600 156 C 590 120 570 104 548 102 C 520 100 492 120 480 180 Z" fill="url(#gRed)"/><path d="M420 178 C 432 112 482 74 540 80 C 520 98 500 130 494 178 Z" fill="#E0405A" opacity=".5"/><circle cx="648" cy="172" r="22" fill="#FFFFFF" stroke="#E6DDEE" stroke-width="2"/><rect x="410" y="164" width="180" height="32" rx="16" fill="#FFFFFF" stroke="#E6DDEE" stroke-width="2"/></g>`],
+  ["Santa hat", () => `<g filter="url(#fShadow)"><path d="M428 186 C 428 128 462 92 512 90 C 560 88 600 108 628 146 C 646 170 656 198 662 226 C 646 220 626 204 606 182 C 596 184 584 186 572 186 Z" fill="url(#gRed)" stroke="#7E0B20" stroke-width="2.5" stroke-linejoin="round"/><path d="M448 180 C 452 136 478 108 516 104" stroke="#F0506A" stroke-width="8" fill="none" stroke-linecap="round" opacity=".55"/><path d="M572 186 C 586 160 604 150 620 156" stroke="#7E0B20" stroke-width="3" fill="none" opacity=".5"/><g fill="#FFFFFF" stroke="#E3D6E6" stroke-width="2"><rect x="414" y="168" width="172" height="34" rx="17"/></g><g fill="#FFFFFF">${[428,452,476,500,524,548,572].map(x=>`<circle cx="${x}" cy="${168+((x/24)%2?2:-1)}" r="9"/>`).join("")}</g><path d="M420 196 Q500 208 580 196" stroke="#E3D6E6" stroke-width="3" fill="none"/><circle cx="664" cy="230" r="21" fill="#FFFFFF" stroke="#E3D6E6" stroke-width="2"/><circle cx="657" cy="223" r="7" fill="#fff"/><circle cx="670" cy="236" r="5" fill="#EFE6F2"/></g>`],
   ["Bobble hat", () => `<g filter="url(#fShadow)"><path d="M424 190 C 424 120 462 90 500 90 C 538 90 576 120 576 190 Z" fill="url(#pKnit)" stroke="#2E9C7E" stroke-width="2.5"/><path d="M424 190 C 424 120 462 90 500 90 C 470 110 450 150 452 190 Z" fill="#fff" opacity=".18"/><rect x="418" y="172" width="164" height="28" rx="12" fill="url(#pCane)" stroke="#8C1530" stroke-width="2"/><circle cx="500" cy="84" r="24" fill="url(#gPink)"/><circle cx="492" cy="76" r="7" fill="#fff" opacity=".45"/></g>`],
   ["Crown", () => `<g filter="url(#fShadow)"><path d="M440 178 L432 104 L466 134 L500 92 L534 134 L568 104 L560 178 Z" fill="url(#gGold)" stroke="#9C6B22" stroke-width="3" stroke-linejoin="round"/><rect x="438" y="160" width="124" height="20" rx="4" fill="url(#gGoldH)" stroke="#9C6B22" stroke-width="2"/><circle cx="500" cy="170" r="7" fill="url(#gPink)"/><circle cx="466" cy="170" r="5" fill="url(#gMint)"/><circle cx="534" cy="170" r="5" fill="url(#gMint)"/><circle cx="432" cy="102" r="7" fill="#F59AC0"/><circle cx="500" cy="88" r="8" fill="#5FD6B3"/><circle cx="568" cy="102" r="7" fill="#F59AC0"/></g>`],
   ["Earmuffs", () => `<g filter="url(#fShadow)"><path d="M424 230 C 424 140 576 140 576 230" fill="none" stroke="url(#gGoldH)" stroke-width="10"/><circle cx="422" cy="236" r="30" fill="url(#gPink)"/><circle cx="578" cy="236" r="30" fill="url(#gPink)"/><circle cx="414" cy="226" r="9" fill="#fff" opacity=".45"/><circle cx="570" cy="226" r="9" fill="#fff" opacity=".45"/></g>`],
   ["Candy cap", () => `<g filter="url(#fShadow)"><path d="M428 186 C 440 120 500 100 560 120 C 610 140 640 110 650 80 C 668 110 640 160 576 186 Z" fill="url(#pCane)" stroke="#8C1530" stroke-width="2.5"/><circle cx="652" cy="78" r="20" fill="url(#gMint)"/><rect x="420" y="170" width="164" height="26" rx="12" fill="url(#gMint)"/></g>`],
   ["No hat", () => ``]]},
  scarf: {label:"Scarf", opts:[
-  ["Cranberry", () => scarf("url(#gRed)","#7E0B20",true)],
-  ["Peppermint", () => scarf("url(#pCane)","#8C1530",false)],
-  ["Mint knit", () => scarf("url(#pKnit)","#2E9C7E",true)],
-  ["Pink dots", () => scarf("url(#pDots)","#C4477A",false)],
-  ["Gold", () => scarf("url(#gGold)","#9C6B22",true)],
+  ["Cranberry stripe", () => scarf("#C8233F","#7E0B20","#FFF8EC")],
+  ["Peppermint", () => scarf("#FFF8EC","#B9848F","#D6243A")],
+  ["Mint knit", () => scarf("url(#pKnit)","#2E9C7E","")],
+  ["Pink dots", () => scarf("url(#pDots)","#C4477A","")],
+  ["Gold", () => scarf("#E8BE5C","#9C6B22","#FFF3C4")],
   ["No scarf", () => ``]]},
  nose: {label:"Nose", opts:[
   ["Carrot", () => `<path d="M500 240 L572 252 L500 262 Z" fill="url(#gCarrot)" stroke="#C45A14" stroke-width="2" stroke-linejoin="round"/><path d="M520 246 l4 8 M538 248 l3 7" stroke="#C45A14" stroke-width="2"/>`],
@@ -271,15 +273,42 @@ const PARTS = {
   ["Broom", () => `<g filter="url(#fShadow)"><path d="M700 200 L660 470" stroke="url(#gWood)" stroke-width="10" stroke-linecap="round"/><path d="M640 450 L690 450 L700 540 L620 540 Z" fill="#E9C46A" stroke="#B98A2E" stroke-width="2"/><path d="M636 470 H692" stroke="#D6243A" stroke-width="6"/></g>`],
   ["Wreath", () => `<g filter="url(#fShadow)"><circle cx="690" cy="330" r="38" fill="none" stroke="url(#gMint)" stroke-width="20"/>${[0,60,120,180,240,300].map(a=>`<circle cx="${690+Math.cos(a*Math.PI/180)*38}" cy="${330+Math.sin(a*Math.PI/180)*38}" r="5" fill="#D6243A"/>`).join("")}<path d="M690 362 c-12 10 -22 22 -16 26 c6 2 12 -10 16 -20 c4 10 10 22 16 20 c6 -4 -4 -16 -16 -26 z" fill="url(#gRed)"/></g>`]]}
 };
-function scarf(fill, edge, fringe){ return `<g filter="url(#fShadow)"><path d="M418 300 C 450 330 550 330 582 300 L 588 330 C 552 362 448 362 412 330 Z" fill="${fill}" stroke="${edge}" stroke-width="2.5"/><path d="M566 322 C 580 372 588 414 584 446 L 550 450 C 552 418 546 378 536 334 Z" fill="${fill}" stroke="${edge}" stroke-width="2.5"/>${fringe ? [554,562,570,578].map(x=>`<path d="M${x} 449 v14" stroke="${edge}" stroke-width="3" stroke-linecap="round"/>`).join("") : ""}<path d="M430 312 C 470 332 530 332 570 312" stroke="#fff" stroke-width="4" opacity=".25" fill="none"/></g>`; }
+function scarf(fill, edge, stripe){
+  const band = "M408 292 C 440 320 560 320 592 292 C 599 303 599 315 592 326 C 560 354 440 354 408 326 C 401 315 401 303 408 292 Z";
+  const tailA = "M540 344 C 548 378 556 412 552 456 L 516 460 C 518 424 514 386 522 348 Z";
+  const tailB = "M566 344 C 588 368 606 394 616 428 L 586 440 C 580 410 568 382 554 354 Z";
+  const knot = "M532 318 C 550 310 578 316 582 334 C 585 352 562 362 542 356 C 528 350 522 328 532 318 Z";
+  const id = "sc" + Math.random().toString(36).slice(2,7);
+  const stripes = stripe ? `<clipPath id="${id}a"><path d="${tailA}"/></clipPath><clipPath id="${id}b"><path d="${tailB}"/></clipPath><clipPath id="${id}n"><path d="${band}"/></clipPath>
+    <g clip-path="url(#${id}a)" fill="${stripe}"><rect x="500" y="400" width="80" height="10" transform="rotate(-4 536 405)"/><rect x="500" y="420" width="80" height="10" transform="rotate(-4 536 425)"/></g>
+    <g clip-path="url(#${id}b)" fill="${stripe}"><rect x="540" y="394" width="100" height="9" transform="rotate(-28 590 398)"/><rect x="548" y="410" width="100" height="9" transform="rotate(-28 598 414)"/></g>
+    <g clip-path="url(#${id}n)" fill="${stripe}"><path d="M430 318 Q500 340 570 318 L570 326 Q500 348 430 326 Z"/></g>` : "";
+  const fr = (x0,y0,x1,y1) => { let o=""; for(let k=0;k<5;k++){ const t=k/4, x=x0+(x1-x0)*t, y=y0+(y1-y0)*t; o += `<path d="M${x.toFixed(1)} ${y.toFixed(1)} l${(1.5-k*.6).toFixed(1)} 13" stroke="${edge}" stroke-width="3.2" stroke-linecap="round"/>`; } return o; };
+  return `<g filter="url(#fShadow)">
+    <path d="${tailB}" fill="${fill}" stroke="${edge}" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="${band}" fill="${fill}" stroke="${edge}" stroke-width="2.5"/>
+    <path d="${tailA}" fill="${fill}" stroke="${edge}" stroke-width="2.5" stroke-linejoin="round"/>
+    ${stripes}
+    <path d="${band}" fill="url(#gFold)"/><path d="${tailA}" fill="url(#gFoldV)"/><path d="${tailB}" fill="url(#gFoldV)"/>
+    <path d="M530 380 C 534 400 536 420 534 440" stroke="${edge}" stroke-width="2" opacity=".35" fill="none"/>
+    <path d="M576 380 C 586 396 594 412 598 430" stroke="${edge}" stroke-width="2" opacity=".35" fill="none"/>
+    <path d="M420 302 C 460 326 540 326 580 302" stroke="#fff" stroke-width="3" opacity=".3" fill="none"/>
+    <path d="${knot}" fill="${fill}" stroke="${edge}" stroke-width="2.5"/><path d="${knot}" fill="url(#gFold)"/>
+    <path d="M540 326 C 552 322 566 326 570 336" stroke="#fff" stroke-width="2.5" opacity=".35" fill="none"/>
+    ${fr(518,460,550,456)}${fr(588,440,614,430)}
+  </g>`;
+}
 function btns(f){ return [[340,0],[388,1],[440,2]].map(([y,i]) => `<g transform="translate(500 ${y})" filter="url(#fShadow)">${f(null,i)}</g>`).join(""); }
+function cane(d){ return `<path d="${d}" fill="none" stroke="#7E0B20" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#FFF8EC" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#D6243A" stroke-width="14" stroke-dasharray="9 9" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".45" transform="translate(-2 -3)"/>`; }
+function twig(side){ const k = side<0 ? -1 : 1, X = x => 500 + k*(x-500);
+  const main = `M${X(398)} 362 C ${X(360)} 340 ${X(330)} 318 ${X(288)} 284`, f1 = `M${X(336)} 320 C ${X(328)} 300 ${X(322)} 288 ${X(314)} 270`, f2 = `M${X(310)} 300 C ${X(292)} 300 ${X(280)} 302 ${X(266)} 306`, f3 = `M${X(300)} 292 L${X(286)} 268`;
+  return [main,f1,f2,f3].map((d,i) => `<path d="${d}" stroke="url(#gWood)" stroke-width="${[10,6,5.5,4.5][i]}" stroke-linecap="round" fill="none"/>`).join("") + `<path d="${main}" stroke="#C99A72" stroke-width="2" fill="none" opacity=".6" transform="translate(0 -2)"/>`; }
 function armsSVG(kind){
-  const L = kind==="cane" ? `<path d="M398 360 L300 300 L280 268 A16 16 0 0 1 306 252" fill="none" stroke="#8C1530" stroke-width="16" stroke-linecap="round"/><path d="M398 360 L300 300 L280 268 A16 16 0 0 1 306 252" fill="none" stroke="url(#pCane)" stroke-width="11" stroke-linecap="round"/>`
-    : `<path d="M398 360 L290 290 M330 316 L310 276 M306 300 L270 296" stroke="url(#gWood)" stroke-width="9" stroke-linecap="round" fill="none"/>`;
-  const Rr = kind==="cane" ? `<path d="M602 360 L700 300 L720 268 A16 16 0 0 0 694 252" fill="none" stroke="#8C1530" stroke-width="16" stroke-linecap="round"/><path d="M602 360 L700 300 L720 268 A16 16 0 0 0 694 252" fill="none" stroke="url(#pCane)" stroke-width="11" stroke-linecap="round"/>`
-    : `<path d="M602 360 L710 290 M670 316 L690 276 M694 300 L730 296" stroke="url(#gWood)" stroke-width="9" stroke-linecap="round" fill="none"/>`;
-  const mit = (x,y,flip) => `<g transform="translate(${x} ${y}) scale(${flip?-1:1} 1)"><path d="M-14 18 L-16 -2 C-17 -16 -6 -22 2 -20 C10 -18 12 -8 11 2 L16 -4 C19 -7 23 -4 21 0 L12 14 L12 18 Z" fill="url(#gRed)" stroke="#7E0B20" stroke-width="2"/><rect x="-16" y="13" width="30" height="9" rx="3" fill="#FFF8EC"/></g>`;
-  return `<g id="armL" class="arm">${L}${kind==="mitten" ? mit(284,282,true) : ""}</g><g id="armR" class="arm">${Rr}${kind==="mitten" ? mit(716,282,false) : ""}</g>`;
+  const mit = (x,y,flip) => `<g transform="translate(${x} ${y}) rotate(${flip?20:-20}) scale(${flip?-1:1} 1)"><path d="M-14 18 L-16 -2 C-17 -16 -6 -22 2 -20 C10 -18 12 -8 11 2 L16 -4 C19 -7 23 -4 21 0 L12 14 L12 18 Z" fill="url(#gRed)" stroke="#7E0B20" stroke-width="2"/><rect x="-16" y="13" width="30" height="9" rx="3" fill="#FFF8EC" stroke="#E3D6E6" stroke-width="1.5"/><path d="M-6 -8 h9 M-8 0 h12" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".7"/></g>`;
+  let L, Rt;
+  if(kind==="cane"){ L = cane("M402 362 L300 274 C 290 256 274 244 258 250 C 244 256 242 272 252 282"); Rt = cane("M598 362 L700 274 C 710 256 726 244 742 250 C 756 256 758 272 748 282"); }
+  else { L = twig(-1); Rt = twig(1); if(kind==="mitten"){ L += mit(288,280,true); Rt += mit(712,280,false); } }
+  return `<g id="armL" class="arm">${L}</g><g id="armR" class="arm">${Rt}</g>`;
 }
 function face(kind){
   const eyeL = kind==="wink" ? `<path d="M458 222 q12 -10 24 0" stroke="#1A1220" stroke-width="5" fill="none" stroke-linecap="round"/>` : `<circle cx="470" cy="222" r="${kind==="oh"?11:9}" fill="url(#gCoal)"/><circle cx="467" cy="218" r="3" fill="#fff"/>`;
