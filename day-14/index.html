@@ -274,15 +274,15 @@ const PARTS = {
   ["Wreath", () => `<g filter="url(#fShadow)"><circle cx="690" cy="330" r="38" fill="none" stroke="url(#gMint)" stroke-width="20"/>${[0,60,120,180,240,300].map(a=>`<circle cx="${690+Math.cos(a*Math.PI/180)*38}" cy="${330+Math.sin(a*Math.PI/180)*38}" r="5" fill="#D6243A"/>`).join("")}<path d="M690 362 c-12 10 -22 22 -16 26 c6 2 12 -10 16 -20 c4 10 10 22 16 20 c6 -4 -4 -16 -16 -26 z" fill="url(#gRed)"/></g>`]]}
 };
 function scarf(fill, edge, stripe){
-  const band = "M408 292 C 440 320 560 320 592 292 C 599 303 599 315 592 326 C 560 354 440 354 408 326 C 401 315 401 303 408 292 Z";
-  const tailA = "M540 344 C 548 378 556 412 552 456 L 516 460 C 518 424 514 386 522 348 Z";
-  const tailB = "M566 344 C 588 368 606 394 616 428 L 586 440 C 580 410 568 382 554 354 Z";
-  const knot = "M532 318 C 550 310 578 316 582 334 C 585 352 562 362 542 356 C 528 350 522 328 532 318 Z";
+  const band = "M432 286 C 458 310 542 310 568 286 C 577 295 578 309 570 318 C 544 342 456 342 430 318 C 422 309 423 295 432 286 Z";
+  const tailA = "M532 330 C 540 366 548 402 544 446 L 508 450 C 510 414 506 374 514 334 Z";
+  const tailB = "M556 330 C 578 356 596 384 606 418 L 576 430 C 570 400 558 370 544 340 Z";
+  const knot = "M526 302 C 538 297 556 299 560 311 C 564 324 558 338 544 341 C 530 344 520 334 519 320 C 518 311 520 305 526 302 Z";
   const id = "sc" + Math.random().toString(36).slice(2,7);
   const stripes = stripe ? `<clipPath id="${id}a"><path d="${tailA}"/></clipPath><clipPath id="${id}b"><path d="${tailB}"/></clipPath><clipPath id="${id}n"><path d="${band}"/></clipPath>
-    <g clip-path="url(#${id}a)" fill="${stripe}"><rect x="500" y="400" width="80" height="10" transform="rotate(-4 536 405)"/><rect x="500" y="420" width="80" height="10" transform="rotate(-4 536 425)"/></g>
-    <g clip-path="url(#${id}b)" fill="${stripe}"><rect x="540" y="394" width="100" height="9" transform="rotate(-28 590 398)"/><rect x="548" y="410" width="100" height="9" transform="rotate(-28 598 414)"/></g>
-    <g clip-path="url(#${id}n)" fill="${stripe}"><path d="M430 318 Q500 340 570 318 L570 326 Q500 348 430 326 Z"/></g>` : "";
+    <g clip-path="url(#${id}a)" fill="${stripe}"><rect x="492" y="390" width="80" height="10" transform="rotate(-4 528 395)"/><rect x="492" y="410" width="80" height="10" transform="rotate(-4 528 415)"/></g>
+    <g clip-path="url(#${id}b)" fill="${stripe}"><rect x="530" y="384" width="100" height="9" transform="rotate(-28 580 388)"/><rect x="538" y="400" width="100" height="9" transform="rotate(-28 588 404)"/></g>
+    <g clip-path="url(#${id}n)" fill="${stripe}"><path d="M430 306 Q500 330 570 306 L570 314 Q500 338 430 314 Z"/></g>` : "";
   const fr = (x0,y0,x1,y1) => { let o=""; for(let k=0;k<5;k++){ const t=k/4, x=x0+(x1-x0)*t, y=y0+(y1-y0)*t; o += `<path d="M${x.toFixed(1)} ${y.toFixed(1)} l${(1.5-k*.6).toFixed(1)} 13" stroke="${edge}" stroke-width="3.2" stroke-linecap="round"/>`; } return o; };
   return `<g filter="url(#fShadow)">
     <path d="${tailB}" fill="${fill}" stroke="${edge}" stroke-width="2.5" stroke-linejoin="round"/>
@@ -290,12 +290,12 @@ function scarf(fill, edge, stripe){
     <path d="${tailA}" fill="${fill}" stroke="${edge}" stroke-width="2.5" stroke-linejoin="round"/>
     ${stripes}
     <path d="${band}" fill="url(#gFold)"/><path d="${tailA}" fill="url(#gFoldV)"/><path d="${tailB}" fill="url(#gFoldV)"/>
-    <path d="M530 380 C 534 400 536 420 534 440" stroke="${edge}" stroke-width="2" opacity=".35" fill="none"/>
-    <path d="M576 380 C 586 396 594 412 598 430" stroke="${edge}" stroke-width="2" opacity=".35" fill="none"/>
-    <path d="M420 302 C 460 326 540 326 580 302" stroke="#fff" stroke-width="3" opacity=".3" fill="none"/>
-    <path d="${knot}" fill="${fill}" stroke="${edge}" stroke-width="2.5"/><path d="${knot}" fill="url(#gFold)"/>
-    <path d="M540 326 C 552 322 566 326 570 336" stroke="#fff" stroke-width="2.5" opacity=".35" fill="none"/>
-    ${fr(518,460,550,456)}${fr(588,440,614,430)}
+    <path d="M522 370 C 526 390 528 410 526 430" stroke="${edge}" stroke-width="2" opacity=".35" fill="none"/>
+    <path d="M566 370 C 576 386 584 402 588 420" stroke="${edge}" stroke-width="2" opacity=".35" fill="none"/>
+    <path d="M440 296 C 470 316 530 316 560 296" stroke="#fff" stroke-width="3" opacity=".3" fill="none"/>
+    <path d="${knot}" fill="${fill}" stroke="${edge}" stroke-width="2.5" stroke-linejoin="round"/>${stripe ? `<clipPath id="${id}k"><path d="${knot}"/></clipPath><g clip-path="url(#${id}k)" fill="${stripe}"><rect x="510" y="312" width="60" height="7" transform="rotate(-12 540 315)"/><rect x="510" y="326" width="60" height="7" transform="rotate(-12 540 329)"/></g>` : ""}<path d="${knot}" fill="url(#gFoldV)"/>
+    <path d="M531 305 C 536 316 538 328 535 339 M549 300 C 553 312 554 326 550 339" stroke="${edge}" stroke-width="2" opacity=".45" fill="none" stroke-linecap="round"/>
+    ${fr(510,450,542,446)}${fr(578,430,604,420)}
   </g>`;
 }
 function btns(f){ return [[340,0],[388,1],[440,2]].map(([y,i]) => `<g transform="translate(500 ${y})" filter="url(#fShadow)">${f(null,i)}</g>`).join(""); }
