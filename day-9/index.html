@@ -55,10 +55,20 @@ h1 small{display:block;font-size:13px;letter-spacing:.14em;text-transform:upperc
 .modes{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:12px}
 .mode{min-height:52px;border-radius:999px;border:none;background:var(--ivory);color:var(--cran);font-size:16px;padding:0 18px;box-shadow:0 0 0 2px var(--pink)}
 .mode[aria-pressed="true"]{background:var(--cran);color:#fff;box-shadow:0 0 0 2px var(--cran),0 4px 10px rgba(140,21,48,.25)}
-#lyrics{min-height:64px;font-size:clamp(18px,2.8vw,24px);line-height:1.6;color:#9a7b84;margin:4px 0 12px}
-#lyrics span{padding:0 1px;border-radius:6px;transition:color .2s,background .2s}
-#lyrics span.done{color:var(--mintdeep)}
-#lyrics span.now{color:#fff;background:var(--cran);padding:0 5px}
+.book{position:relative;margin:6px auto 14px;max-width:820px;padding:18px 18px 14px;border-radius:10px 10px 14px 14px;background:linear-gradient(90deg,#FFF8EC 0 49.6%,#EAD9BF 49.6% 50.4%,#FFF8EC 50.4%);
+  box-shadow:0 0 0 6px #8C1530,0 0 0 9px #D9A94A,0 12px 22px rgba(74,34,48,.25)}
+.book::before{content:"";position:absolute;inset:6px;border:1.5px dashed #E6C7A0;border-radius:8px;pointer-events:none}
+.book h3{margin:0 0 2px;font-weight:normal;color:var(--cran);font-size:clamp(17px,2.6vw,22px);font-style:italic}
+.book .pg{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mintdeep);margin-bottom:10px}
+#lyrics{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 6px;min-height:84px}
+.nb{display:flex;flex-direction:column;align-items:center;gap:2px;width:54px;padding:4px 0 6px;border-radius:12px;transition:transform .2s,background .2s,opacity .2s}
+.nb svg{width:40px;height:40px;display:block}
+.nb small{font-size:14px;color:var(--ink);line-height:1.1;text-align:center;word-break:break-word}
+.nb.done{opacity:.4}
+.nb.now{background:#FFF1C2;box-shadow:0 0 0 3px #E2B04E;transform:translateY(-4px) scale(1.08)}
+.nb.now small{color:var(--cran);font-weight:bold}
+.bookHint{font-size:14px;color:#7a5a63;font-style:italic;margin:8px 0 0}
+@media (max-width:560px){.nb{width:44px}.nb svg{width:32px;height:32px}.nb small{font-size:12px}.book{padding:14px 8px 12px}}
 #msg{font-size:17px;font-style:italic;margin:0 0 12px;color:var(--ink)}
 .btns{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
 @media (max-width:560px){.stage{border-radius:18px}.wrap{padding:6px 10px 24px}.mode{font-size:14px;min-height:48px;padding:0 12px}}
@@ -136,7 +146,12 @@ h1 small{display:block;font-size:13px;letter-spacing:.14em;text-transform:upperc
       <button class="mode" data-song="wish" aria-pressed="false">We Wish You a Merry Christmas</button>
     </div>
     <p id="msg" aria-live="polite">Tap the candy bells to make music! Tap Captain&rsquo;s drum for a rum-pum-pum.</p>
-    <div id="lyrics" aria-live="polite"></div>
+    <div class="book" id="book" hidden>
+      <h3 id="bookTitle"></h3>
+      <div class="pg" id="bookPage"></div>
+      <div id="lyrics" aria-live="polite"></div>
+      <p class="bookHint">Ring the bell that matches each picture, from left to right. Follow the numbers!</p>
+    </div>
     <div class="btns">
       <button class="make gold" id="listenBtn" hidden>&#9835; Listen first</button>
       <button class="small" id="restartBtn" hidden>Start the song again</button>
@@ -220,6 +235,8 @@ NOTES.forEach((n,i) => {
   el("rect",{x:cx-w*.47,y:y0+h*.72,width:w*.94,height:h*.08,rx:3,fill:"url(#gGoldH)","pointer-events":"none"},g);
   el("ellipse",{cx,cy:y0+h*.92,rx:w*.54,ry:h*.07,fill:COLS[i][1],"pointer-events":"none"},g);
   el("circle",{cx,cy:y0+h*1.0,r:w*.1,fill:"url(#gGold)",stroke:"#A9772A","stroke-width":2,"pointer-events":"none"},g);
+  el("circle",{cx,cy:y0+h*.5,r:w*.17,fill:"#FFF8EC",stroke:COLS[i][1],"stroke-width":2.5,"pointer-events":"none"},g);
+  const num = el("text",{x:cx,y:y0+h*.5+w*.075,"text-anchor":"middle","font-size":w*.22,"font-family":"Georgia, serif","font-weight":"bold",fill:COLS[i][1],"pointer-events":"none"},g); num.textContent = i+1;
   // little bow
   el("path",{d:`M${cx} ${y0} c-10 -12 -24 -8 -20 2 c3 8 14 6 20 -2 z M${cx} ${y0} c10 -12 24 -8 20 2 c-3 8 -14 6 -20 -2 z`,fill:"#F59AC0",stroke:"#C4477A","stroke-width":1.5,"pointer-events":"none"},g);
   bells.push(g);
@@ -285,19 +302,25 @@ const SONGS = {
     and|G|.5 a|G|.5 hap-|A py|D New|B Year!|C|2`)}
 };
 let mode = "free", pos = 0, listening = false, listenTimer = null;
+function bellIcon(i){
+  return `<svg viewBox="-20 -22 40 44" aria-hidden="true"><path d="M-6 -16 C-7 -10 -12 -7 -12 2 C-12 8 -15 10 -16 13 L16 13 C15 10 12 8 12 2 C12 -7 7 -10 6 -16 Z" fill="${COLS[i][0]}" stroke="${COLS[i][1]}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="0" cy="16" r="3.5" fill="#E2B04E" stroke="#A9772A" stroke-width="1.2"/><circle cx="0" cy="0" r="7.5" fill="#FFF8EC" stroke="${COLS[i][1]}" stroke-width="1.5"/><text x="0" y="3.6" text-anchor="middle" font-size="10" font-weight="bold" font-family="Georgia, serif" fill="${COLS[i][1]}">${i+1}</text></svg>`;
+}
 function renderLyrics(){
   const L = $("lyrics"); L.innerHTML = "";
+  $("book").hidden = mode === "free";
   if(mode === "free") return;
-  const notes = SONGS[mode].notes, line = notes[Math.min(pos, notes.length-1)].line;
-  notes.forEach((nt,k) => { if(nt.line !== line) return; const s = document.createElement("span"); s.dataset.k = k; s.textContent = nt.syl + (/-$/.test(nt.syl) ? "" : " "); s.className = k<pos ? "done" : k===pos ? "now" : ""; L.appendChild(s); });
-  if(pos >= notes.length) L.innerHTML = "";
+  const notes = SONGS[mode].notes, done = pos >= notes.length, line = notes[Math.min(pos, notes.length-1)].line, lines = notes[notes.length-1].line + 1;
+  $("bookTitle").textContent = SONGS[mode].name;
+  $("bookPage").textContent = done ? "The end – bravo!" : `Page ${line+1} of ${lines}`;
+  if(done) return;
+  notes.forEach((nt,k) => { if(nt.line !== line) return; const s = document.createElement("span"); s.className = "nb" + (k<pos ? " done" : k===pos ? " now" : ""); s.innerHTML = bellIcon(nt.n) + `<small>${nt.syl}</small>`; s.setAttribute("aria-label", `Bell ${nt.n+1}: ${nt.syl}`); L.appendChild(s); });
 }
 function markNext(){ bells.forEach(b => b.classList.remove("next")); if(mode!=="free" && pos < SONGS[mode].notes.length && !listening) bells[SONGS[mode].notes[pos].n].classList.add("next"); }
 function setMode(m){
   stopListen(); mode = m; pos = 0;
   document.querySelectorAll(".mode").forEach(b => b.setAttribute("aria-pressed", b.dataset.song===m ? "true":"false"));
   $("listenBtn").hidden = m==="free"; $("restartBtn").hidden = m==="free";
-  $("msg").textContent = m==="free" ? "Tap the candy bells to make music! Tap Captain’s drum for a rum-pum-pum." : `Let’s play “${SONGS[m].name}”! Tap the bell that’s glowing.`;
+  $("msg").textContent = m==="free" ? "Tap the candy bells to make music! Tap Captain’s drum for a rum-pum-pum." : `Let’s play “${SONGS[m].name}”! Follow the music book \u2013 the bell to ring next is glowing.`;
   renderLyrics(); markNext();
 }
 function onPlayerNote(i){
