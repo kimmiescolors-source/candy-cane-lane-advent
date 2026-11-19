@@ -60,7 +60,7 @@ h1 small{display:block;font-size:13px;letter-spacing:.14em;text-transform:upperc
 @media (max-width:560px){ .stage{border-radius:18px;aspect-ratio:3/4;max-height:64vh;margin:0 auto} #cap{height:42%} .hud{font-size:15px} .hud .lives svg{width:24px;height:24px} .card{padding:14px 14px} }
 @media (hover:hover) and (pointer:fine){ .pads{display:none} }
 </style>
-</head>
+<style>/* QA: short landscape phones - fit the play area on screen */@media (orientation:landscape) and (max-height:500px){header{padding:4px 12px 0}header h1{font-size:20px;margin:0}.hud{margin-top:2px;margin-bottom:4px;max-width:min(100%,calc((100svh - 112px)*1.5625));margin-left:auto;margin-right:auto}.stage{width:min(100%,calc((100svh - 112px)*1.5625));margin:0 auto}.pads{position:fixed;left:10px;right:10px;bottom:10px;margin:0;pointer-events:none;z-index:20}.pad{pointer-events:auto;flex:0 0 76px;min-height:76px;opacity:.92}}</style></head>
 <body>
 <div class="stripe"></div>
 <header>
